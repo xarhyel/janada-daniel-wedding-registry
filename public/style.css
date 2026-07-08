@@ -7,7 +7,7 @@
 
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-  background-color: #FDF8F5;
+  background-color: #FAF6F0;
   color: #2C2C2C;
   line-height: 1.6;
 }
@@ -20,7 +20,7 @@ h1, h2, h3, h4 {
 
 /* ===== Hero Section ===== */
 .hero {
-  background: linear-gradient(135deg, #8BA888 0%, #6B8F6A 100%);
+  background: linear-gradient(135deg, #8B6F47 0%, #6B4F3A 100%);
   color: #fff;
   text-align: center;
   padding: 5rem 1.5rem 4rem;
@@ -34,7 +34,7 @@ h1, h2, h3, h4 {
   left: 0;
   right: 0;
   height: 40px;
-  background: #FDF8F5;
+  background: #FAF6F0;
   clip-path: ellipse(70% 100% at 50% 100%);
 }
 
@@ -98,7 +98,7 @@ h1, h2, h3, h4 {
   display: block;
   width: 60px;
   height: 2px;
-  background: #D4AF37;
+  background: #C4A882;
   margin: 0.75rem auto 0;
 }
 
@@ -139,7 +139,7 @@ h1, h2, h3, h4 {
 .item-image {
   width: 100%;
   height: 140px;
-  background: #f0efe7;
+  background: #EDE3D4;
   border-radius: 8px;
   margin-bottom: 1rem;
   display: flex;
@@ -150,7 +150,7 @@ h1, h2, h3, h4 {
 }
 
 .item-image.has-photo {
-  background: #e8e4dd;
+  background: #E0D4C3;
   padding: 0;
 }
 
@@ -169,7 +169,7 @@ h1, h2, h3, h4 {
   font-size: 0.75rem;
   text-transform: uppercase;
   letter-spacing: 1.5px;
-  color: #8BA888;
+  color: #8B6F47;
   margin-bottom: 0.35rem;
 }
 
@@ -190,7 +190,7 @@ h1, h2, h3, h4 {
 
 .item-price {
   font-size: 0.9rem;
-  color: #8BA888;
+  color: #8B6F47;
   font-weight: 600;
   margin-bottom: 1rem;
 }
@@ -214,21 +214,21 @@ h1, h2, h3, h4 {
 }
 
 .btn-primary {
-  background: #8BA888;
+  background: #8B6F47;
   color: #fff;
 }
 
 .btn-primary:hover {
-  background: #7A9778;
+  background: #7A5C3E;
 }
 
 .btn-secondary {
-  background: #e8e4dd;
+  background: #E0D4C3;
   color: #2C2C2C;
 }
 
 .btn-secondary:hover {
-  background: #dcd7ce;
+  background: #D4C4B0;
 }
 
 /* ===== Claimed Badge ===== */
@@ -236,8 +236,8 @@ h1, h2, h3, h4 {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  background: #f0f7ef;
-  border: 1px solid #8BA888;
+  background: #F5EDE0;
+  border: 1px solid #C4A882;
   border-radius: 8px;
   padding: 0.6rem 1rem;
   font-size: 0.85rem;
@@ -251,7 +251,7 @@ h1, h2, h3, h4 {
 
 .claimed-badge-name {
   font-weight: 600;
-  color: #8BA888;
+  color: #8B6F47;
 }
 
 .claimed-badge-message {
@@ -362,8 +362,8 @@ h1, h2, h3, h4 {
 .modal-content input:focus,
 .modal-content textarea:focus {
   outline: none;
-  border-color: #8BA888;
-  box-shadow: 0 0 0 3px rgba(139,168,136,0.15);
+  border-color: #C4A882;
+  box-shadow: 0 0 0 3px rgba(196,168,130,0.15);
 }
 
 /* ===== Footer ===== */
@@ -410,7 +410,7 @@ h1, h2, h3, h4 {
   height: 24px;
   margin-left: 0.5rem;
   border: 2px solid #ddd;
-  border-top-color: #8BA888;
+  border-top-color: #8B6F47;
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
   vertical-align: middle;
