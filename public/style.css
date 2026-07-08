@@ -146,6 +146,23 @@ h1, h2, h3, h4 {
   align-items: center;
   justify-content: center;
   font-size: 2.5rem;
+  overflow: hidden;
+}
+
+.item-image.has-photo {
+  background: #e8e4dd;
+  padding: 0;
+}
+
+.item-icon {
+  display: inline;
+}
+
+.item-photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 
 .item-category {

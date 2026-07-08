@@ -42,9 +42,13 @@ function createItemCard(item) {
   card.dataset.id = item.id;
 
   const icon = getCategoryIcon(item.category);
+  const imageHtml = item.image_url
+    ? `<img src="${item.image_url}" alt="${escapeHtml(item.name)}" class="item-photo" loading="lazy" onerror="this.style.display='none'">`
+    : `<span class="item-icon">${icon}</span>`;
+  const hasImageClass = item.image_url ? ' has-photo' : '';
 
   card.innerHTML = `
-    <div class="item-image">${icon}</div>
+    <div class="item-image${hasImageClass}">${imageHtml}</div>
     <div class="item-category">${escapeHtml(item.category)}</div>
     <div class="item-name">${escapeHtml(item.name)}</div>
     <div class="item-description">${escapeHtml(item.description)}</div>
