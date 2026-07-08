@@ -20,6 +20,10 @@ module.exports = function (pool) {
     const { id } = req.params;
     const { name, message } = req.body;
 
+    if (!/^\d+$/.test(id)) {
+      return res.status(400).json({ error: 'Invalid item ID' });
+    }
+
     if (!name || !name.trim()) {
       return res.status(400).json({ error: 'Name is required to claim a gift' });
     }
@@ -35,9 +39,13 @@ module.exports = function (pool) {
       }
 
       const result = await pool.query(
-        'UPDATE items SET claimed = TRUE, claimed_by = $1, claim_message = $2, updated_at = CURRENT_TIMESTAMP WHERE id = $3 RETURNING id, name, description, category, price_range, image_url, sort_order, claimed, claimed_by, claim_message',
+        'UPDATE items SET claimed = TRUE, claimed_by = $1, claim_message = $2, updated_at = CURRENT_TIMESTAMP WHERE id = $3 AND claimed = FALSE RETURNING id, name, description, category, price_range, image_url, sort_order, claimed, claimed_by, claim_message',
         [name.trim(), (message || '').trim(), id]
       );
+
+      if (result.rows.length === 0) {
+        return res.status(409).json({ error: 'This gift has already been claimed' });
+      }
 
       res.json({ success: true, item: result.rows[0] });
     } catch (err) {
@@ -50,6 +58,10 @@ module.exports = function (pool) {
   router.post('/:id/unclaim', async (req, res) => {
     const { id } = req.params;
     const { name } = req.body;
+
+    if (!/^\d+$/.test(id)) {
+      return res.status(400).json({ error: 'Invalid item ID' });
+    }
 
     if (!name || !name.trim()) {
       return res.status(400).json({ error: 'Name is required to unclaim a gift' });
