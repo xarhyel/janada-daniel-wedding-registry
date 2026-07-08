@@ -32,36 +32,76 @@
     </div>
   </main>
 
-  <!-- Claim Modal -->
-  <div id="claim-modal" class="modal hidden">
+  <!-- Step 1: Contribution Modal (Select Percentage & Enter Name) -->
+  <div id="contrib-modal" class="modal hidden">
     <div class="modal-backdrop"></div>
     <div class="modal-content">
       <button class="modal-close" aria-label="Close">&times;</button>
-      <h3 class="modal-title">Claim This Gift</h3>
-      <p class="modal-item-name" id="modal-item-name"></p>
-      <form id="claim-form">
-        <input type="hidden" id="claim-item-id" />
-        <label for="claimer-name">Your Name</label>
-        <input type="text" id="claimer-name" required placeholder="e.g. Aunt Sarah" />
-        <label for="claimer-message">Message for the Couple <span class="optional">(optional)</span></label>
-        <textarea id="claimer-message" rows="3" placeholder="Write a short note..."></textarea>
-        <button type="submit" class="btn btn-primary">🎁 Claim Gift</button>
+      <h3 class="modal-title">Contribute to This Gift</h3>
+      <p class="modal-item-name" id="contrib-item-name"></p>
+      <form id="contrib-form">
+        <input type="hidden" id="contrib-item-id" />
+
+        <label>Select your contribution</label>
+        <div class="percentage-options">
+          <button type="button" class="percentage-option" data-pct="25">25%</button>
+          <button type="button" class="percentage-option" data-pct="50">50%</button>
+          <button type="button" class="percentage-option" data-pct="75">75%</button>
+          <button type="button" class="percentage-option" data-pct="100">100%</button>
+        </div>
+
+        <div class="contrib-calc">
+          You'll contribute <strong id="contrib-calc-pct">25%</strong> —
+          <span class="contrib-calc-amount" id="contrib-calc-amount">$0.00</span>
+        </div>
+
+        <label for="contrib-name">Your Name</label>
+        <input type="text" id="contrib-name" required placeholder="e.g. Aunt Sarah" />
+
+        <button type="submit" class="btn btn-primary">Continue to Payment</button>
       </form>
     </div>
   </div>
 
-  <!-- Unclaim Modal -->
-  <div id="unclaim-modal" class="modal hidden">
+  <!-- Step 2: Confirmation Modal (Account Details & I Have Paid) -->
+  <div id="confirm-modal" class="modal hidden">
     <div class="modal-backdrop"></div>
     <div class="modal-content">
       <button class="modal-close" aria-label="Close">&times;</button>
-      <h3 class="modal-title">Remove Your Claim</h3>
-      <p>Enter the name you used to claim this gift to remove it.</p>
-      <form id="unclaim-form">
-        <input type="hidden" id="unclaim-item-id" />
-        <label for="unclaimer-name">Your Name</label>
-        <input type="text" id="unclaimer-name" required placeholder="Enter the name you used" />
-        <button type="submit" class="btn btn-secondary">Remove Claim</button>
+      <h3 class="modal-title">Complete Your Contribution</h3>
+      <p class="modal-item-name" id="confirm-item-name"></p>
+
+      <div class="confirm-details">
+        <div class="confirm-row">
+          <span class="confirm-label">Amount</span>
+          <span class="confirm-value" id="confirm-amount"></span>
+        </div>
+      </div>
+
+      <div class="account-details">
+        <h4>Bank Transfer Details</h4>
+        <div class="account-row">
+          <span class="account-label">Account Name</span>
+          <span class="account-value" id="confirm-account-name"></span>
+        </div>
+        <div class="account-row">
+          <span class="account-label">Account Number</span>
+          <span class="account-value account-number" id="confirm-account-number"></span>
+        </div>
+        <div class="account-row">
+          <span class="account-label">Bank</span>
+          <span class="account-value" id="confirm-bank"></span>
+        </div>
+      </div>
+
+      <p class="confirm-instruction">After you've made the transfer, click below to confirm.</p>
+
+      <form id="confirm-form">
+        <input type="hidden" id="confirm-contrib-id" />
+        <input type="hidden" id="confirm-name" />
+
+        <button type="submit" class="btn btn-primary">✓ Yes, I Have Paid</button>
+        <button type="button" class="btn btn-secondary modal-close" style="margin-top:0.5rem">Cancel</button>
       </form>
     </div>
   </div>

@@ -3,18 +3,31 @@ const API_BASE = '/api/items';
 // State
 let items = [];
 
+// Account details (shown after user initiates a contribution)
+const ACCOUNT = {
+  name: 'Janada Oluwafunmilayo Anjorin',
+  number: '7036288231',
+  bank: 'Opay'
+};
+
 // DOM refs
 const grid = document.getElementById('items-grid');
-const claimModal = document.getElementById('claim-modal');
-const unclaimModal = document.getElementById('unclaim-modal');
-const claimForm = document.getElementById('claim-form');
-const unclaimForm = document.getElementById('unclaim-form');
-const modalItemName = document.getElementById('modal-item-name');
-const claimItemId = document.getElementById('claim-item-id');
-const claimerName = document.getElementById('claimer-name');
-const claimerMessage = document.getElementById('claimer-message');
-const unclaimItemId = document.getElementById('unclaim-item-id');
-const unclaimerName = document.getElementById('unclaimer-name');
+const contribModal = document.getElementById('contrib-modal');
+const confirmModal = document.getElementById('confirm-modal');
+const contribForm = document.getElementById('contrib-form');
+const confirmForm = document.getElementById('confirm-form');
+const modalItemName = document.getElementById('contrib-item-name');
+const contribItemId = document.getElementById('contrib-item-id');
+const contribName = document.getElementById('contrib-name');
+const percentageOptions = document.querySelectorAll('.percentage-option');
+
+const confirmItemName = document.getElementById('confirm-item-name');
+const confirmAmount = document.getElementById('confirm-amount');
+const confirmAccountName = document.getElementById('confirm-account-name');
+const confirmAccountNumber = document.getElementById('confirm-account-number');
+const confirmBank = document.getElementById('confirm-bank');
+const confirmContribId = document.getElementById('confirm-contrib-id');
+const confirmName = document.getElementById('confirm-name');
 
 // ==============================
 // Toast
@@ -30,45 +43,20 @@ const toast = createToast();
 function showToast(message) {
   toast.textContent = message;
   toast.classList.add('show');
-  setTimeout(() => toast.classList.remove('show'), 3000);
+  setTimeout(() => toast.classList.remove('show'), 3500);
 }
 
 // ==============================
-// Item Card
+// Helpers
 // ==============================
-function createItemCard(item) {
-  const card = document.createElement('div');
-  card.className = 'item-card' + (item.claimed ? ' claimed' : '');
-  card.dataset.id = item.id;
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
 
-  const icon = getCategoryIcon(item.category);
-  const imageHtml = item.image_url
-    ? `<img src="${item.image_url}" alt="${escapeHtml(item.name)}" class="item-photo" loading="lazy" onerror="this.style.display='none'">`
-    : `<span class="item-icon">${icon}</span>`;
-  const hasImageClass = item.image_url ? ' has-photo' : '';
-
-  card.innerHTML = `
-    <div class="item-image${hasImageClass}">${imageHtml}</div>
-    <div class="item-category">${escapeHtml(item.category)}</div>
-    <div class="item-name">${escapeHtml(item.name)}</div>
-    <div class="item-description">${escapeHtml(item.description)}</div>
-    <div class="item-price">${escapeHtml(item.price_range)}</div>
-    ${item.claimed ? `
-      <div class="claimed-badge">
-        <span class="claimed-badge-icon">🎁</span>
-        <span>
-          <span class="claimed-badge-name">${escapeHtml(item.claimed_by)}</span> claimed this
-          ${item.claim_message ? `<div class="claimed-badge-message">"${escapeHtml(item.claim_message)}"</div>` : ''}
-        </span>
-      </div>
-      <button class="btn btn-primary" disabled>Claimed</button>
-      <span class="remove-claim-link" data-id="${item.id}">Remove my claim</span>
-    ` : `
-      <button class="btn btn-primary claim-btn" data-id="${item.id}">🎁 Claim This Gift</button>
-    `}
-  `;
-
-  return card;
+function formatCurrency(amount) {
+  return '$' + parseFloat(amount).toFixed(2);
 }
 
 function getCategoryIcon(category) {
@@ -81,10 +69,56 @@ function getCategoryIcon(category) {
   return icons[category] || '🎁';
 }
 
-function escapeHtml(str) {
-  const div = document.createElement('div');
-  div.textContent = str;
-  return div.innerHTML;
+// ==============================
+// Item Card
+// ==============================
+function createItemCard(item) {
+  const card = document.createElement('div');
+  card.className = 'item-card';
+  card.dataset.id = item.id;
+
+  const icon = getCategoryIcon(item.category);
+  const imageHtml = item.image_url
+    ? `<img src="${item.image_url}" alt="${escapeHtml(item.name)}" class="item-photo" loading="lazy" onerror="this.style.display='none'">`
+    : `<span class="item-icon">${icon}</span>`;
+  const hasImageClass = item.image_url ? ' has-photo' : '';
+
+  // Calculate progress info
+  const fundedPct = parseInt(item.funded_percentage) || 0;
+  const fundedAmt = parseFloat(item.funded_amount) || 0;
+  const price = parseFloat(item.price) || 0;
+  const fullyFunded = fundedPct >= 100;
+
+  // Build contributors detail
+  let contributorsHtml = '';
+  if (item.contributor_count > 0) {
+    const count = parseInt(item.contributor_count);
+    contributorsHtml = `<div class="contributor-summary">${count} ${count === 1 ? 'person has' : 'people have'} contributed to this item</div>`;
+  }
+
+  card.innerHTML = `
+    <div class="item-image${hasImageClass}">${imageHtml}</div>
+    <div class="item-category">${escapeHtml(item.category)}</div>
+    <div class="item-name">${escapeHtml(item.name)}</div>
+    <div class="item-description">${escapeHtml(item.description)}</div>
+    <div class="item-price">${escapeHtml(item.price_range)}</div>
+
+    <div class="funding-bar">
+      <div class="funding-bar-fill" style="width: ${Math.min(fundedPct, 100)}%"></div>
+    </div>
+    <div class="funding-text">
+      <span>${fullyFunded ? 'Fully funded! 🎉' : fundedPct + '% funded'}</span>
+      <span>${formatCurrency(fundedAmt)} / ${formatCurrency(price)}</span>
+    </div>
+    ${contributorsHtml}
+
+    ${!fullyFunded
+      ? `<button class="btn btn-primary contribute-btn" data-id="${item.id}">🎁 Contribute</button>`
+      : `<button class="btn btn-primary" disabled>Fully Funded ✓</button>`
+    }
+  `;
+
+  return card;
 }
 
 // ==============================
@@ -103,13 +137,9 @@ function renderItems() {
     grid.appendChild(card);
   });
 
-  // Attach event listeners after render
-  document.querySelectorAll('.claim-btn').forEach(btn => {
-    btn.addEventListener('click', () => openClaimModal(parseInt(btn.dataset.id)));
-  });
-
-  document.querySelectorAll('.remove-claim-link').forEach(link => {
-    link.addEventListener('click', () => openUnclaimModal(parseInt(link.dataset.id)));
+  // Attach contribute button listeners
+  document.querySelectorAll('.contribute-btn').forEach(btn => {
+    btn.addEventListener('click', () => openContribModal(parseInt(btn.dataset.id)));
   });
 }
 
@@ -130,107 +160,140 @@ async function fetchItems() {
 }
 
 // ==============================
-// Claim Flow
+// Contribution Flow — Step 1: Select Percentage & Enter Name
 // ==============================
-function openClaimModal(itemId) {
+let selectedPercentage = 25;
+
+function openContribModal(itemId) {
   const item = items.find(i => i.id === itemId);
-  if (!item || item.claimed) return;
+  if (!item) return;
+
   modalItemName.textContent = item.name;
-  claimItemId.value = itemId;
-  claimerName.value = '';
-  claimerMessage.value = '';
-  claimModal.classList.remove('hidden');
-  claimerName.focus();
+  contribItemId.value = itemId;
+  contribName.value = '';
+  selectedPercentage = 25;
+  updateCalculatedAmount(item);
+
+  // Highlight 25% by default
+  percentageOptions.forEach(opt => {
+    const pct = parseInt(opt.dataset.pct);
+    opt.classList.toggle('selected', pct === 25);
+  });
+
+  contribModal.classList.remove('hidden');
+  contribName.focus();
 }
 
-async function handleClaimSubmit(e) {
-  e.preventDefault();
-  const id = claimItemId.value;
-  const name = claimerName.value.trim();
-  const message = claimerMessage.value.trim();
+function updateCalculatedAmount(item) {
+  const amount = (parseFloat(item.price) * selectedPercentage) / 100;
+  document.getElementById('contrib-calc-amount').textContent = formatCurrency(amount);
+  document.getElementById('contrib-calc-pct').textContent = selectedPercentage + '%';
+}
 
+percentageOptions.forEach(opt => {
+  opt.addEventListener('click', () => {
+    percentageOptions.forEach(o => o.classList.remove('selected'));
+    opt.classList.add('selected');
+    selectedPercentage = parseInt(opt.dataset.pct);
+
+    const itemId = parseInt(contribItemId.value);
+    const item = items.find(i => i.id === itemId);
+    if (item) updateCalculatedAmount(item);
+  });
+});
+
+async function handleContribSubmit(e) {
+  e.preventDefault();
+  const id = contribItemId.value;
+  const name = contribName.value.trim();
   if (!name) return;
 
-  const btn = claimForm.querySelector('button[type="submit"]');
+  const btn = contribForm.querySelector('button[type="submit"]');
   btn.disabled = true;
-  btn.textContent = 'Claiming...';
+  btn.textContent = 'Processing...';
 
   try {
-    const res = await fetch(`${API_BASE}/${id}/claim`, {
+    const res = await fetch(`${API_BASE}/${id}/contribute`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, message }),
+      body: JSON.stringify({ name, percentage: selectedPercentage }),
     });
 
+    const data = await res.json();
+
     if (!res.ok) {
-      const data = await res.json();
-      showToast(data.error || 'Could not claim gift');
+      showToast(data.error || 'Could not create contribution');
       return;
     }
 
-    const data = await res.json();
-    const idx = items.findIndex(i => i.id === parseInt(id));
-    if (idx !== -1) items[idx] = data.item;
-
-    renderItems();
+    // Switch to confirmation modal with account details
     closeModals();
-    showToast(`🎉 You claimed "${data.item.name}"!`);
+    showConfirmModal(data.contribution, name);
   } catch (err) {
     showToast('Something went wrong. Please try again.');
   } finally {
     btn.disabled = false;
-    btn.textContent = '🎁 Claim Gift';
+    btn.textContent = 'Continue to Payment';
   }
 }
 
 // ==============================
-// Unclaim Flow
+// Contribution Flow — Step 2: Show Account & Confirm Payment
 // ==============================
-function openUnclaimModal(itemId) {
-  const item = items.find(i => i.id === itemId);
-  if (!item || !item.claimed) return;
-  unclaimItemId.value = itemId;
-  unclaimerName.value = '';
-  unclaimModal.classList.remove('hidden');
-  unclaimerName.focus();
+function showConfirmModal(contribution, name) {
+  const item = items.find(i => i.id === contribution.item_id);
+  confirmItemName.textContent = item ? item.name : 'Item';
+  confirmAmount.textContent = formatCurrency(contribution.amount) + ' (' + contribution.percentage + '%)';
+  confirmAccountName.textContent = ACCOUNT.name;
+  confirmAccountNumber.textContent = ACCOUNT.number;
+  confirmBank.textContent = ACCOUNT.bank;
+  confirmContribId.value = contribution.id;
+  confirmName.value = name;
+
+  confirmModal.classList.remove('hidden');
 }
 
-async function handleUnclaimSubmit(e) {
+async function handleConfirmSubmit(e) {
   e.preventDefault();
-  const id = unclaimItemId.value;
-  const name = unclaimerName.value.trim();
-
+  const id = contribItemId.value;
+  const contribId = confirmContribId.value;
+  const name = confirmName.value.trim();
   if (!name) return;
 
-  const btn = unclaimForm.querySelector('button[type="submit"]');
+  const btn = confirmForm.querySelector('button[type="submit"]');
   btn.disabled = true;
-  btn.textContent = 'Removing...';
+  btn.textContent = 'Confirming...';
 
   try {
-    const res = await fetch(`${API_BASE}/${id}/unclaim`, {
+    const res = await fetch(`${API_BASE}/${id}/confirm/${contribId}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name }),
     });
 
+    const data = await res.json();
+
     if (!res.ok) {
-      const data = await res.json();
-      showToast(data.error || 'Could not remove claim');
+      showToast(data.error || 'Could not confirm payment');
       return;
     }
 
-    const data = await res.json();
+    // Update local state
     const idx = items.findIndex(i => i.id === parseInt(id));
-    if (idx !== -1) items[idx] = data.item;
+    if (idx !== -1) {
+      items[idx].funded_percentage = parseInt(data.item.funded_percentage);
+      items[idx].funded_amount = parseFloat(data.item.funded_amount);
+      items[idx].contributor_count = parseInt(data.item.contributor_count);
+    }
 
     renderItems();
     closeModals();
-    showToast('Claim removed.');
+    showToast('🎉 Thank you for your contribution!');
   } catch (err) {
     showToast('Something went wrong. Please try again.');
   } finally {
     btn.disabled = false;
-    btn.textContent = 'Remove Claim';
+    btn.textContent = '✓ Yes, I Have Paid';
   }
 }
 
@@ -238,8 +301,8 @@ async function handleUnclaimSubmit(e) {
 // Modal helpers
 // ==============================
 function closeModals() {
-  claimModal.classList.add('hidden');
-  unclaimModal.classList.add('hidden');
+  contribModal.classList.add('hidden');
+  confirmModal.classList.add('hidden');
 }
 
 // Close modals on backdrop click
@@ -251,6 +314,10 @@ document.querySelectorAll('.modal-close').forEach(btn => {
   btn.addEventListener('click', closeModals);
 });
 
+document.querySelectorAll('.modal-back-button').forEach(btn => {
+  btn.addEventListener('click', closeModals);
+});
+
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') closeModals();
 });
@@ -258,6 +325,6 @@ document.addEventListener('keydown', (e) => {
 // ==============================
 // Init
 // ==============================
-claimForm.addEventListener('submit', handleClaimSubmit);
-unclaimForm.addEventListener('submit', handleUnclaimSubmit);
+contribForm.addEventListener('submit', handleContribSubmit);
+confirmForm.addEventListener('submit', handleConfirmSubmit);
 fetchItems();

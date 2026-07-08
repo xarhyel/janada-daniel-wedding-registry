@@ -132,10 +132,6 @@ h1, h2, h3, h4 {
   box-shadow: 0 4px 16px rgba(0,0,0,0.1);
 }
 
-.item-card.claimed {
-  opacity: 0.85;
-}
-
 .item-image {
   width: 100%;
   height: 140px;
@@ -231,49 +227,156 @@ h1, h2, h3, h4 {
   background: #D4C4B0;
 }
 
-/* ===== Claimed Badge ===== */
-.claimed-badge {
+/* ===== Funding Progress Bar ===== */
+.funding-bar {
+  width: 100%;
+  height: 8px;
+  background: #EDE3D4;
+  border-radius: 4px;
+  margin-bottom: 0.4rem;
+  overflow: hidden;
+}
+
+.funding-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #8B6F47, #C4A882);
+  border-radius: 4px;
+  transition: width 0.5s ease;
+}
+
+.funding-text {
   display: flex;
+  justify-content: space-between;
   align-items: center;
-  gap: 0.5rem;
-  background: #F5EDE0;
-  border: 1px solid #C4A882;
-  border-radius: 8px;
-  padding: 0.6rem 1rem;
-  font-size: 0.85rem;
-  color: #2C2C2C;
+  font-size: 0.8rem;
+  color: #888;
   margin-bottom: 0.75rem;
 }
 
-.claimed-badge-icon {
-  font-size: 1.1rem;
+.contributor-summary {
+  font-size: 0.78rem;
+  color: #8B6F47;
+  margin-bottom: 0.6rem;
+  font-style: italic;
 }
 
-.claimed-badge-name {
+/* ===== Percentage Options ===== */
+.percentage-options {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.percentage-option {
+  padding: 0.6rem 0.3rem;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  background: #fff;
+  font-size: 0.85rem;
   font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+  text-align: center;
+  color: #2C2C2C;
+}
+
+.percentage-option:hover {
+  border-color: #C4A882;
+  background: #FAF6F0;
+}
+
+.percentage-option.selected {
+  border-color: #8B6F47;
+  background: #F5EDE0;
+  color: #6B4F3A;
+}
+
+/* ===== Calculated Amount ===== */
+.contrib-calc {
+  text-align: center;
+  padding: 0.75rem;
+  background: #FAF6F0;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #555;
+  margin-bottom: 1.25rem;
+}
+
+.contrib-calc-amount {
+  font-size: 1.3rem;
+  font-weight: 700;
   color: #8B6F47;
 }
 
-.claimed-badge-message {
-  font-style: italic;
+/* ===== Account Details ===== */
+.confirm-details {
+  margin-bottom: 1rem;
+}
+
+.confirm-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0;
+}
+
+.confirm-label {
+  font-weight: 600;
+  color: #555;
+  font-size: 0.9rem;
+}
+
+.confirm-value {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #8B6F47;
+}
+
+.account-details {
+  background: #FAF6F0;
+  border: 1px solid #C4A882;
+  border-radius: 10px;
+  padding: 1.25rem;
+  margin-bottom: 1rem;
+}
+
+.account-details h4 {
+  font-size: 1rem;
+  margin-bottom: 0.75rem;
+  color: #2C2C2C;
+}
+
+.account-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.35rem 0;
+  font-size: 0.88rem;
+}
+
+.account-label {
   color: #888;
-  font-size: 0.8rem;
-  margin-top: 0.15rem;
 }
 
-.remove-claim-link {
-  display: block;
+.account-value {
+  font-weight: 600;
+  color: #2C2C2C;
+  text-align: right;
+  max-width: 60%;
+}
+
+.account-number {
+  font-family: 'Courier New', monospace;
+  font-size: 1rem;
+  letter-spacing: 1px;
+  color: #6B4F3A;
+}
+
+.confirm-instruction {
+  font-size: 0.85rem;
+  color: #888;
+  margin-bottom: 1rem;
   text-align: center;
-  font-size: 0.82rem;
-  color: #999;
-  cursor: pointer;
-  margin-top: 0.25rem;
-  text-decoration: underline;
-  text-underline-offset: 2px;
-}
-
-.remove-claim-link:hover {
-  color: #c0392b;
 }
 
 /* ===== Modal ===== */
@@ -438,6 +541,10 @@ h1, h2, h3, h4 {
 
   .items-grid {
     grid-template-columns: 1fr;
+  }
+
+  .percentage-options {
+    grid-template-columns: repeat(2, 1fr);
   }
 }
 

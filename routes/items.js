@@ -2,12 +2,29 @@ const express = require('express');
 const router = express.Router();
 
 module.exports = function (pool) {
-  // GET /api/items — list all items sorted by sort_order
+  // GET /api/items — list all items with contribution summary
   router.get('/', async (req, res) => {
     try {
-      const result = await pool.query(
-        'SELECT id, name, description, category, price_range, image_url, sort_order, claimed, claimed_by, claim_message FROM items ORDER BY sort_order ASC'
-      );
+      const result = await pool.query(`
+        SELECT
+          i.id, i.name, i.description, i.category, i.price_range, i.price,
+          i.image_url, i.sort_order,
+          COALESCE(c.funded_percentage, 0) AS funded_percentage,
+          COALESCE(c.funded_amount, 0) AS funded_amount,
+          COALESCE(c.contributor_count, 0) AS contributor_count
+        FROM items i
+        LEFT JOIN (
+          SELECT
+            item_id,
+            SUM(percentage) AS funded_percentage,
+            SUM(amount) AS funded_amount,
+            COUNT(*) AS contributor_count
+          FROM contributions
+          WHERE paid = TRUE
+          GROUP BY item_id
+        ) c ON c.item_id = i.id
+        ORDER BY i.sort_order ASC
+      `);
       res.json(result.rows);
     } catch (err) {
       console.error('Error fetching items:', err);
@@ -15,83 +32,168 @@ module.exports = function (pool) {
     }
   });
 
-  // POST /api/items/:id/claim — claim an item
-  router.post('/:id/claim', async (req, res) => {
+  // GET /api/items/:id — single item with contributions
+  router.get('/:id', async (req, res) => {
     const { id } = req.params;
-    const { name, message } = req.body;
-
     if (!/^\d+$/.test(id)) {
       return res.status(400).json({ error: 'Invalid item ID' });
     }
-
-    if (!name || !name.trim()) {
-      return res.status(400).json({ error: 'Name is required to claim a gift' });
-    }
-
     try {
-      // Check item exists and isn't already claimed
-      const check = await pool.query('SELECT * FROM items WHERE id = $1', [id]);
-      if (check.rows.length === 0) {
+      const itemResult = await pool.query(
+        'SELECT id, name, description, category, price_range, price, image_url, sort_order FROM items WHERE id = $1',
+        [id]
+      );
+      if (itemResult.rows.length === 0) {
         return res.status(404).json({ error: 'Item not found' });
       }
-      if (check.rows[0].claimed) {
-        return res.status(409).json({ error: 'This gift has already been claimed' });
-      }
+      const item = itemResult.rows[0];
 
-      const result = await pool.query(
-        'UPDATE items SET claimed = TRUE, claimed_by = $1, claim_message = $2, updated_at = CURRENT_TIMESTAMP WHERE id = $3 AND claimed = FALSE RETURNING id, name, description, category, price_range, image_url, sort_order, claimed, claimed_by, claim_message',
-        [name.trim(), (message || '').trim(), id]
+      const contribResult = await pool.query(
+        'SELECT id, contributor_name, percentage, amount, paid, created_at FROM contributions WHERE item_id = $1 ORDER BY created_at DESC',
+        [id]
       );
+      item.contributions = contribResult.rows;
 
-      if (result.rows.length === 0) {
-        return res.status(409).json({ error: 'This gift has already been claimed' });
-      }
+      const paid = contribResult.rows.filter(c => c.paid);
+      item.funded_percentage = paid.reduce((s, c) => s + c.percentage, 0);
+      item.funded_amount = parseFloat(paid.reduce((s, c) => s + parseFloat(c.amount), 0));
 
-      res.json({ success: true, item: result.rows[0] });
+      res.json(item);
     } catch (err) {
-      console.error('Error claiming item:', err);
-      res.status(500).json({ error: 'Failed to claim item' });
+      console.error('Error fetching item:', err);
+      res.status(500).json({ error: 'Failed to fetch item' });
     }
   });
 
-  // POST /api/items/:id/unclaim — unclaim an item (name must match)
-  router.post('/:id/unclaim', async (req, res) => {
+  // GET /api/items/:id/contributions — list unpaid contributions for an item
+  router.get('/:id/contributions', async (req, res) => {
     const { id } = req.params;
-    const { name } = req.body;
+    if (!/^\d+$/.test(id)) {
+      return res.status(400).json({ error: 'Invalid item ID' });
+    }
+    try {
+      const result = await pool.query(
+        'SELECT id, contributor_name, percentage, amount, paid, created_at FROM contributions WHERE item_id = $1 ORDER BY created_at DESC',
+        [id]
+      );
+      res.json(result.rows);
+    } catch (err) {
+      console.error('Error fetching contributions:', err);
+      res.status(500).json({ error: 'Failed to fetch contributions' });
+    }
+  });
+
+  // POST /api/items/:id/contribute — create a contribution (paid=false)
+  router.post('/:id/contribute', async (req, res) => {
+    const { id } = req.params;
+    const { name, percentage } = req.body;
 
     if (!/^\d+$/.test(id)) {
       return res.status(400).json({ error: 'Invalid item ID' });
     }
-
     if (!name || !name.trim()) {
-      return res.status(400).json({ error: 'Name is required to unclaim a gift' });
+      return res.status(400).json({ error: 'Name is required' });
+    }
+    if (![25, 50, 75, 100].includes(percentage)) {
+      return res.status(400).json({ error: 'Percentage must be 25, 50, 75, or 100' });
     }
 
     try {
-      const check = await pool.query('SELECT * FROM items WHERE id = $1', [id]);
-      if (check.rows.length === 0) {
+      // Get item price
+      const itemResult = await pool.query(
+        'SELECT id, name, price FROM items WHERE id = $1',
+        [id]
+      );
+      if (itemResult.rows.length === 0) {
         return res.status(404).json({ error: 'Item not found' });
       }
-      if (!check.rows[0].claimed) {
-        return res.status(409).json({ error: 'This gift is not currently claimed' });
-      }
-      if (check.rows[0].claimed_by !== name.trim()) {
-        return res.status(403).json({ error: 'Name does not match the claimer' });
+      const item = itemResult.rows[0];
+
+      // Check if item is already fully funded
+      const fundedResult = await pool.query(
+        'SELECT COALESCE(SUM(percentage), 0) AS total FROM contributions WHERE item_id = $1 AND paid = TRUE',
+        [id]
+      );
+      const currentTotal = parseInt(fundedResult.rows[0].total);
+      if (currentTotal + percentage > 100) {
+        return res.status(409).json({
+          error: `Only ${100 - currentTotal}% remaining for this item. Please choose a lower percentage.`,
+          remaining: 100 - currentTotal
+        });
       }
 
+      // Calculate amount
+      const amount = (parseFloat(item.price) * percentage) / 100;
+
       const result = await pool.query(
-        'UPDATE items SET claimed = FALSE, claimed_by = \'\', claim_message = \'\', updated_at = CURRENT_TIMESTAMP WHERE id = $1 AND claimed_by = $2 AND claimed = TRUE RETURNING id, name, description, category, price_range, image_url, sort_order, claimed, claimed_by, claim_message',
-        [id, name.trim()]
+        `INSERT INTO contributions (item_id, contributor_name, percentage, amount, paid)
+         VALUES ($1, $2, $3, $4, FALSE)
+         RETURNING id, contributor_name, percentage, amount, paid, created_at`,
+        [id, name.trim(), percentage, amount]
+      );
+
+      res.json({
+        success: true,
+        contribution: result.rows[0],
+        account: {
+          name: 'Janada Oluwafunmilayo Anjorin',
+          number: '7036288231',
+          bank: 'Opay'
+        }
+      });
+    } catch (err) {
+      console.error('Error creating contribution:', err);
+      res.status(500).json({ error: 'Failed to create contribution' });
+    }
+  });
+
+  // POST /api/items/:id/confirm/:contributionId — mark contribution as paid
+  router.post('/:id/confirm/:contributionId', async (req, res) => {
+    const { id, contributionId } = req.params;
+    const { name } = req.body;
+
+    if (!/^\d+$/.test(id) || !/^\d+$/.test(contributionId)) {
+      return res.status(400).json({ error: 'Invalid ID' });
+    }
+    if (!name || !name.trim()) {
+      return res.status(400).json({ error: 'Name is required' });
+    }
+
+    try {
+      const result = await pool.query(
+        `UPDATE contributions
+         SET paid = TRUE
+         WHERE id = $1 AND item_id = $2 AND contributor_name = $3 AND paid = FALSE
+         RETURNING id, contributor_name, percentage, amount, paid, created_at`,
+        [contributionId, id, name.trim()]
       );
 
       if (result.rows.length === 0) {
-        return res.status(409).json({ error: 'This gift has been re-claimed, cannot unclaim' });
+        return res.status(404).json({
+          error: 'Contribution not found or already confirmed. Check your name matches.'
+        });
       }
 
-      res.json({ success: true, item: result.rows[0] });
+      // Fetch updated item summary
+      const itemResult = await pool.query(`
+        SELECT i.id, i.name, i.price,
+          COALESCE(SUM(c.percentage), 0) AS funded_percentage,
+          COALESCE(SUM(c.amount), 0) AS funded_amount,
+          COUNT(c.id) AS contributor_count
+        FROM items i
+        LEFT JOIN contributions c ON c.item_id = i.id AND c.paid = TRUE
+        WHERE i.id = $1
+        GROUP BY i.id, i.name, i.price
+      `, [id]);
+
+      res.json({
+        success: true,
+        contribution: result.rows[0],
+        item: itemResult.rows[0]
+      });
     } catch (err) {
-      console.error('Error unclaiming item:', err);
-      res.status(500).json({ error: 'Failed to unclaim item' });
+      console.error('Error confirming payment:', err);
+      res.status(500).json({ error: 'Failed to confirm payment' });
     }
   });
 
