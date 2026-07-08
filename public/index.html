@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Janada & Daniel's Wedding Registry</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- Hero -->
+  <header class="hero">
+    <div class="hero-content">
+      <p class="hero-subtitle">We're getting married!</p>
+      <h1 class="hero-title">Janada <span class="hero-amp">&amp;</span> Daniel</h1>
+      <p class="hero-date">Coming Soon</p>
+      <p class="hero-message">
+        Thank you for celebrating with us. Your presence is the greatest gift,
+        but if you'd like to help us stock our home, we've put together a list
+        of things we'd love.
+      </p>
+    </div>
+  </header>
+
+  <!-- Registry Items -->
+  <main class="registry">
+    <h2 class="section-title">Our Registry</h2>
+    <div id="items-grid" class="items-grid">
+      <!-- Items rendered by JavaScript -->
+    </div>
+  </main>
+
+  <!-- Claim Modal -->
+  <div id="claim-modal" class="modal hidden">
+    <div class="modal-backdrop"></div>
+    <div class="modal-content">
+      <button class="modal-close" aria-label="Close">&times;</button>
+      <h3 class="modal-title">Claim This Gift</h3>
+      <p class="modal-item-name" id="modal-item-name"></p>
+      <form id="claim-form">
+        <input type="hidden" id="claim-item-id" />
+        <label for="claimer-name">Your Name</label>
+        <input type="text" id="claimer-name" required placeholder="e.g. Aunt Sarah" />
+        <label for="claimer-message">Message for the Couple <span class="optional">(optional)</span></label>
+        <textarea id="claimer-message" rows="3" placeholder="Write a short note..."></textarea>
+        <button type="submit" class="btn btn-primary">🎁 Claim Gift</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Unclaim Modal -->
+  <div id="unclaim-modal" class="modal hidden">
+    <div class="modal-backdrop"></div>
+    <div class="modal-content">
+      <button class="modal-close" aria-label="Close">&times;</button>
+      <h3 class="modal-title">Remove Your Claim</h3>
+      <p>Enter the name you used to claim this gift to remove it.</p>
+      <form id="unclaim-form">
+        <input type="hidden" id="unclaim-item-id" />
+        <label for="unclaimer-name">Your Name</label>
+        <input type="text" id="unclaimer-name" required placeholder="Enter the name you used" />
+        <button type="submit" class="btn btn-secondary">Remove Claim</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <p>Made with love &mdash; Janada &amp; Daniel</p>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
