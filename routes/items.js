@@ -80,9 +80,13 @@ module.exports = function (pool) {
       }
 
       const result = await pool.query(
-        'UPDATE items SET claimed = FALSE, claimed_by = \'\', claim_message = \'\', updated_at = CURRENT_TIMESTAMP WHERE id = $1 RETURNING id, name, description, category, price_range, image_url, sort_order, claimed, claimed_by, claim_message',
-        [id]
+        'UPDATE items SET claimed = FALSE, claimed_by = \'\', claim_message = \'\', updated_at = CURRENT_TIMESTAMP WHERE id = $1 AND claimed_by = $2 AND claimed = TRUE RETURNING id, name, description, category, price_range, image_url, sort_order, claimed, claimed_by, claim_message',
+        [id, name.trim()]
       );
+
+      if (result.rows.length === 0) {
+        return res.status(409).json({ error: 'This gift has been re-claimed, cannot unclaim' });
+      }
 
       res.json({ success: true, item: result.rows[0] });
     } catch (err) {
