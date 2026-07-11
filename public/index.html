@@ -3,36 +3,43 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Janada & Daniel's Wedding Registry</title>
+  <title>Janada &amp; Eyen's Wedding Registry</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
+  <!-- Floral Side Decor -->
+  <div class="floral-side left"></div>
+  <div class="floral-side right"></div>
+
   <!-- Hero -->
   <header class="hero">
     <div class="hero-content">
-      <p class="hero-subtitle">We're getting married!</p>
-      <h1 class="hero-title">Janada <span class="hero-amp">&amp;</span> Daniel</h1>
+      <p class="hero-badge">&#10047; Our Wedding Registry &#10047;</p>
+      <h1 class="hero-title">Janada <span class="amp">&amp;</span> Eyen</h1>
+      <div class="hero-divider"></div>
       <p class="hero-date">Coming Soon</p>
       <p class="hero-message">
-        Thank you for celebrating with us. Your presence is the greatest gift,
-        but if you'd like to help us stock our home, we've put together a list
-        of things we'd love.
+        Your presence is the greatest gift of all. But if you'd like to help us
+        begin our journey together, we've gathered a few things we'd treasure.
       </p>
     </div>
   </header>
 
   <!-- Registry Items -->
   <main class="registry">
-    <h2 class="section-title">Our Registry</h2>
+    <div class="section-header">
+      <h2>Our Registry</h2>
+      <span class="ornament">&#10047; &#10048; &#10047;</span>
+    </div>
     <div id="items-grid" class="items-grid">
       <!-- Items rendered by JavaScript -->
     </div>
   </main>
 
-  <!-- Step 1: Contribution Modal (Enter Amount & Name) -->
+  <!-- Step 1: Contribution Modal -->
   <div id="contrib-modal" class="modal hidden">
     <div class="modal-backdrop"></div>
     <div class="modal-content">
@@ -41,33 +48,28 @@
       <p class="modal-item-name" id="contrib-item-name"></p>
       <form id="contrib-form">
         <input type="hidden" id="contrib-item-id" />
-
-        <label for="contrib-amount">Amount (₦)</label>
+        <label for="contrib-amount">Amount (&#8358;)</label>
         <input type="number" id="contrib-amount" required min="10000" step="1000" placeholder="e.g. 50000" />
-
         <label for="contrib-name">Your Name</label>
         <input type="text" id="contrib-name" required placeholder="e.g. Aunt Sarah" />
-
         <button type="submit" class="btn btn-primary">Continue to Payment</button>
       </form>
     </div>
   </div>
 
-  <!-- Step 2: Confirmation Modal (Account Details & I Have Paid) -->
+  <!-- Step 2: Confirmation Modal -->
   <div id="confirm-modal" class="modal hidden">
     <div class="modal-backdrop"></div>
     <div class="modal-content">
       <button class="modal-close" aria-label="Close">&times;</button>
       <h3 class="modal-title">Complete Your Contribution</h3>
       <p class="modal-item-name" id="confirm-item-name"></p>
-
       <div class="confirm-details">
         <div class="confirm-row">
           <span class="confirm-label">Amount</span>
           <span class="confirm-value" id="confirm-amount"></span>
         </div>
       </div>
-
       <div class="account-details">
         <h4>Bank Transfer Details</h4>
         <div class="account-row">
@@ -83,14 +85,11 @@
           <span class="account-value" id="confirm-bank"></span>
         </div>
       </div>
-
       <p class="confirm-instruction">After you've made the transfer, click below to confirm.</p>
-
       <form id="confirm-form">
         <input type="hidden" id="confirm-contrib-id" />
         <input type="hidden" id="confirm-name" />
-
-        <button type="submit" class="btn btn-primary">✓ Yes, I Have Paid</button>
+        <button type="submit" class="btn btn-primary">&#10003; Yes, I Have Paid</button>
         <button type="button" class="btn btn-secondary modal-close" style="margin-top:0.5rem">Cancel</button>
       </form>
     </div>
@@ -98,7 +97,8 @@
 
   <!-- Footer -->
   <footer class="footer">
-    <p>Made with love &mdash; Janada &amp; Daniel</p>
+    <div class="footer-flowers">&#10047; &#10048; &#10047;</div>
+    <p>Made with love &mdash; Janada &amp; Eyen</p>
   </footer>
 
   <script src="app.js"></script>

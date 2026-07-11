@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Design C: Warm Whimsical — Janada & Eyen</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet" />
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: #FFFCF7;
+      color: #3D3228;
+      line-height: 1.6;
+    }
+
+    /* ===== Floral Side Decor ===== */
+    .floral-side {
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      width: 80px;
+      pointer-events: none;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-around;
+      align-items: center;
+      padding: 2rem 0;
+      font-size: 1.7rem;
+      opacity: 0.2;
+    }
+    .floral-side.left { left: 0; }
+    .floral-side.right { right: 0; }
+    .floral-side .row { display: flex; gap: 4px; align-items: center; }
+    .floral-side .row.big { font-size: 2.1rem; }
+
+    /* ===== Hero ===== */
+    .hero {
+      position: relative;
+      background: linear-gradient(180deg, #FAF0E6 0%, #FFFCF7 100%);
+      text-align: center;
+      padding: 5rem 1.5rem 4rem;
+      overflow: hidden;
+    }
+    .hero-dots {
+      position: absolute;
+      top: 8%;
+      right: 6%;
+      width: 80px;
+      height: 80px;
+      background: radial-gradient(circle, rgba(196,168,130,0.15) 2px, transparent 2px);
+      background-size: 12px 12px;
+    }
+    .hero-dots-2 {
+      position: absolute;
+      bottom: 12%;
+      left: 5%;
+      width: 60px;
+      height: 60px;
+      background: radial-gradient(circle, rgba(139,111,71,0.1) 2px, transparent 2px);
+      background-size: 10px 10px;
+    }
+    .hero-content { position: relative; z-index: 2; max-width: 620px; margin: 0 auto; }
+
+    .hero-heart {
+      font-size: 2rem;
+      margin-bottom: 1rem;
+      display: block;
+    }
+
+    .hero-title {
+      font-family: 'DM Serif Display', Georgia, serif;
+      font-size: 3.2rem;
+      line-height: 1.1;
+      color: #6B4F3A;
+      margin-bottom: 0.5rem;
+    }
+    .hero-title .amp {
+      font-style: italic;
+      color: #C4A882;
+    }
+
+    .hero-sub {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.1rem;
+      font-style: italic;
+      color: #B8A88A;
+      margin-bottom: 1rem;
+    }
+
+    .hero-message {
+      font-size: 0.92rem;
+      color: #8B7B6A;
+      line-height: 1.8;
+      max-width: 460px;
+      margin: 0 auto;
+      font-weight: 400;
+    }
+
+    /* ===== Registry ===== */
+    .registry {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 3.5rem 1.5rem 4rem;
+      position: relative;
+      z-index: 2;
+    }
+
+    .section-header {
+      text-align: center;
+      margin-bottom: 2.5rem;
+    }
+    .section-header h2 {
+      font-family: 'DM Serif Display', Georgia, serif;
+      font-size: 2rem;
+      color: #6B4F3A;
+    }
+    .section-header h2::after {
+      content: '✿ ❀ ✿';
+      display: block;
+      font-size: 0.9rem;
+      letter-spacing: 0.6rem;
+      color: #D4C4B0;
+      margin-top: 0.5rem;
+    }
+
+    .items-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .item-card {
+      background: #fff;
+      border-radius: 24px;
+      box-shadow: 0 4px 24px rgba(139,111,71,0.06);
+      border: 1px solid #F0EAE0;
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.3s, box-shadow 0.3s;
+      overflow: hidden;
+    }
+    .item-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 32px rgba(139,111,71,0.1);
+    }
+
+    .item-image {
+      width: 100%;
+      height: 160px;
+      background: linear-gradient(135deg, #F5EDE0, #EDE3D4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.8rem;
+      overflow: hidden;
+    }
+
+    .item-body {
+      padding: 1.25rem 1.5rem 1.5rem;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+    .item-category {
+      display: inline-block;
+      background: #F5EDE0;
+      padding: 0.2rem 0.75rem;
+      border-radius: 50px;
+      font-size: 0.68rem;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: #8B6F47;
+      margin-bottom: 0.6rem;
+      align-self: flex-start;
+    }
+    .item-name {
+      font-family: 'DM Serif Display', Georgia, serif;
+      font-size: 1.2rem;
+      color: #3D3228;
+      margin-bottom: 0.25rem;
+    }
+    .item-description {
+      font-size: 0.85rem;
+      color: #A89888;
+      line-height: 1.5;
+      margin-bottom: 0.75rem;
+      flex: 1;
+    }
+    .item-price {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #8B6F47;
+      margin-bottom: 0.75rem;
+    }
+    .item-progress {
+      height: 6px;
+      background: #F0EAE0;
+      border-radius: 3px;
+      margin-bottom: 0.5rem;
+      overflow: hidden;
+    }
+    .item-progress-fill {
+      height: 100%;
+      width: 35%;
+      background: linear-gradient(90deg, #C4A882, #8B6F47);
+      border-radius: 3px;
+    }
+    .item-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 0.25rem;
+    }
+    .contrib-count { font-size: 0.78rem; color: #C4A882; }
+    .btn-contribute {
+      padding: 0.5rem 1.5rem;
+      background: #8B6F47;
+      border: none;
+      border-radius: 50px;
+      color: #fff;
+      font-size: 0.85rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: inherit;
+      box-shadow: 0 2px 8px rgba(139,111,71,0.2);
+    }
+    .btn-contribute:hover {
+      background: #6B4F3A;
+      transform: scale(1.02);
+      box-shadow: 0 4px 12px rgba(139,111,71,0.3);
+    }
+
+    .footer {
+      position: relative;
+      z-index: 2;
+      text-align: center;
+      padding: 2.5rem 1.5rem;
+      background: #FAF0E6;
+      color: #B8A88A;
+      font-size: 0.85rem;
+    }
+
+    .mock-badge {
+      position: fixed;
+      top: 1rem;
+      right: 1rem;
+      background: #FFFCF7;
+      border: 1.5px solid #C4A882;
+      color: #6B4F3A;
+      padding: 0.4rem 1rem;
+      border-radius: 50px;
+      font-size: 0.75rem;
+      font-weight: 500;
+      z-index: 100;
+    }
+
+    @media (max-width: 768px) {
+      .floral-side, .vine { display: none; }
+    }
+    @media (max-width: 640px) {
+      .hero-title { font-size: 2rem; }
+      .hero { padding: 3.5rem 1.25rem 3rem; }
+      .items-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="mock-badge">Design C: Warm Whimsical</div>
+
+<div class="floral-side left">
+  <div class="row big">🌿🌸🌿</div>
+  <div class="row">🌷🕊️🌷</div>
+  <div class="row big">🌺🌿🌺</div>
+  <div class="row">🌸🌷🌸</div>
+  <div class="row big">🌿🌹🌿</div>
+  <div class="row">🌷🌺🌷</div>
+  <div class="row big">🌸🌿🌸</div>
+  <div class="row">🌿🕊️🌿</div>
+</div>
+<div class="floral-side right">
+  <div class="row big">🌿🌷🌿</div>
+  <div class="row">🌺🌸🌺</div>
+  <div class="row big">🌹🌿🌹</div>
+  <div class="row">🌸🌷🌸</div>
+  <div class="row big">🌿🌺🌿</div>
+  <div class="row">🌷🌸🌷</div>
+  <div class="row big">🌹🌿🌹</div>
+  <div class="row">🌿🕊️🌿</div>
+</div>
+
+<header class="hero">
+  <div class="hero-dots"></div>
+  <div class="hero-dots-2"></div>
+  <div class="hero-content">
+    <span class="hero-heart">💕</span>
+    <h1 class="hero-title">Janada <span class="amp">&amp;</span> Eyen</h1>
+    <p class="hero-sub">— our wedding registry —</p>
+    <p class="hero-message">
+      We can't wait to start our life together. If you'd like to help us
+      make our house a home, here are a few things we'd absolutely love.
+    </p>
+  </div>
+</header>
+
+<main class="registry">
+  <div class="section-header">
+    <h2>Things We Love</h2>
+  </div>
+
+  <div class="items-grid">
+    <div class="item-card">
+      <div class="item-image">🛋️</div>
+      <div class="item-body">
+        <div class="item-category">Furniture</div>
+        <div class="item-name">Furniture</div>
+        <div class="item-description">Quality furniture for your home</div>
+        <div class="item-price">₦3,000,000</div>
+        <div class="item-progress"><div class="item-progress-fill" style="width: 15%"></div></div>
+        <div class="item-footer">
+          <span class="contrib-count">2 helped</span>
+          <button class="btn-contribute">Contribute</button>
+        </div>
+      </div>
+    </div>
+    <div class="item-card">
+      <div class="item-image">📺</div>
+      <div class="item-body">
+        <div class="item-category">Electronics</div>
+        <div class="item-name">65" Smart TV</div>
+        <div class="item-description">Latest 65 inch smart television</div>
+        <div class="item-price">₦1,300,000</div>
+        <div class="item-footer">
+          <span class="contrib-count">Be the first 🎀</span>
+          <button class="btn-contribute">Contribute</button>
+        </div>
+      </div>
+    </div>
+    <div class="item-card">
+      <div class="item-image">🏺</div>
+      <div class="item-body">
+        <div class="item-category">Home Decor</div>
+        <div class="item-name">Rug</div>
+        <div class="item-description">Beautiful area rug for your living space</div>
+        <div class="item-price">₦350,000</div>
+        <div class="item-footer">
+          <span class="contrib-count">Be the first 🎀</span>
+          <button class="btn-contribute">Contribute</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer class="footer">
+  <p>Made with love, Janada &amp; Eyen 🩷</p>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Design A: Elegant Romantic — Janada & Eyen</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #FAF6F0;
+      color: #2C2C2C;
+      line-height: 1.6;
+    }
+
+    /* ===== Floral Side Decor ===== */
+    .floral-side {
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      width: 80px;
+      pointer-events: none;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-around;
+      align-items: center;
+      padding: 2rem 0;
+      font-size: 1.6rem;
+      opacity: 0.25;
+    }
+    .floral-side.left { left: 0; }
+    .floral-side.right { right: 0; }
+    .floral-side .row { display: flex; gap: 4px; align-items: center; }
+    .floral-side .row.big { font-size: 2rem; }
+
+    /* ===== Hero ===== */
+    .hero {
+      position: relative;
+      background: linear-gradient(165deg, #6B4F3A 0%, #8B6F47 40%, #A0845C 100%);
+      color: #fff;
+      text-align: center;
+      padding: 6rem 1.5rem 5rem;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(circle 80px at 5% 20%, rgba(255,255,240,0.08) 0%, transparent 70%),
+        radial-gradient(circle 60px at 95% 30%, rgba(255,255,240,0.06) 0%, transparent 70%),
+        radial-gradient(circle 100px at 10% 80%, rgba(255,255,240,0.05) 0%, transparent 70%),
+        radial-gradient(circle 70px at 90% 70%, rgba(255,255,240,0.07) 0%, transparent 70%);
+    }
+    .hero::after {
+      content: '✿ ❀ ✿ ❀ ✿';
+      position: absolute;
+      bottom: 1.5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 0.9rem;
+      letter-spacing: 2rem;
+      opacity: 0.15;
+      color: #FAF6F0;
+    }
+    .hero-content { position: relative; z-index: 2; max-width: 640px; margin: 0 auto; }
+    .hero-badge {
+      display: inline-block;
+      border: 1px solid rgba(255,255,255,0.3);
+      border-radius: 50px;
+      padding: 0.35rem 1.2rem;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      margin-bottom: 1.5rem;
+      opacity: 0.85;
+    }
+    .hero-title {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 3.5rem;
+      font-weight: 700;
+      line-height: 1.1;
+      margin-bottom: 0.5rem;
+    }
+    .hero-title .amp { font-style: italic; font-weight: 400; opacity: 0.7; }
+    .hero-date {
+      font-size: 1rem;
+      opacity: 0.75;
+      letter-spacing: 2px;
+      margin-bottom: 1.5rem;
+      font-weight: 300;
+    }
+    .hero-message {
+      font-size: 0.95rem;
+      opacity: 0.8;
+      line-height: 1.8;
+      max-width: 480px;
+      margin: 0 auto;
+      font-weight: 300;
+    }
+    .hero-divider {
+      width: 60px;
+      height: 1px;
+      background: rgba(255,255,255,0.4);
+      margin: 1.25rem auto;
+    }
+
+    /* ===== Section ===== */
+    .registry {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 4rem 1.5rem;
+      position: relative;
+      z-index: 2;
+    }
+    .section-header {
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+    .section-header h2 {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 2rem;
+      color: #6B4F3A;
+      margin-bottom: 0.5rem;
+    }
+    .section-header p {
+      color: #999;
+      font-size: 0.9rem;
+      font-weight: 300;
+    }
+    .section-header .ornament {
+      display: block;
+      margin: 0.75rem auto 0;
+      font-size: 1.2rem;
+      color: #C4A882;
+      letter-spacing: 0.8rem;
+    }
+
+    /* ===== Grid ===== */
+    .items-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1.75rem;
+    }
+
+    .item-card {
+      background: #fff;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 4px 20px rgba(139,111,71,0.08);
+      transition: transform 0.3s, box-shadow 0.3s;
+      display: flex;
+      flex-direction: column;
+    }
+    .item-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 32px rgba(139,111,71,0.12);
+    }
+
+    .item-image {
+      width: 100%;
+      height: 180px;
+      background: #EDE3D4;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 3rem;
+      overflow: hidden;
+    }
+    .item-image .placeholder { color: #C4A882; opacity: 0.5; }
+
+    .item-body {
+      padding: 1.25rem 1.5rem 1.5rem;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+    .item-category {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: #A0845C;
+      margin-bottom: 0.3rem;
+    }
+    .item-name {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 1.15rem;
+      color: #2C2C2C;
+      margin-bottom: 0.3rem;
+    }
+    .item-description {
+      font-size: 0.85rem;
+      color: #888;
+      line-height: 1.5;
+      margin-bottom: 0.75rem;
+      flex: 1;
+    }
+    .item-price {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #8B6F47;
+      margin-bottom: 0.75rem;
+    }
+    .item-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-top: 0.75rem;
+      border-top: 1px solid #F0EAE0;
+    }
+    .contrib-count {
+      font-size: 0.78rem;
+      color: #B8A88A;
+    }
+    .contrib-count span { color: #8B6F47; font-weight: 600; }
+
+    .btn-contribute {
+      padding: 0.5rem 1.25rem;
+      background: transparent;
+      border: 1.5px solid #C4A882;
+      border-radius: 50px;
+      color: #6B4F3A;
+      font-size: 0.8rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: inherit;
+    }
+    .btn-contribute:hover {
+      background: #8B6F47;
+      border-color: #8B6F47;
+      color: #fff;
+    }
+
+    /* ===== Footer ===== */
+    .footer {
+      position: relative;
+      z-index: 2;
+      text-align: center;
+      padding: 3rem 1.5rem;
+      color: #B8A88A;
+      font-size: 0.8rem;
+      border-top: 1px solid #EDE3D4;
+      background: #F5EDE0;
+    }
+    .footer .flowers { opacity: 0.3; letter-spacing: 0.5rem; margin-bottom: 0.5rem; font-size: 0.9rem; }
+
+    /* ===== Mock ===== */
+    .mock-badge {
+      position: fixed;
+      top: 1rem;
+      right: 1rem;
+      background: #6B4F3A;
+      color: #FAF6F0;
+      padding: 0.4rem 1rem;
+      border-radius: 50px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      z-index: 100;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    }
+
+    @media (max-width: 768px) {
+      .floral-side, .vine { display: none; }
+    }
+    @media (max-width: 640px) {
+      .hero-title { font-size: 2.2rem; }
+      .hero { padding: 4rem 1.25rem 3.5rem; }
+      .items-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="mock-badge">Design A: Elegant Romantic</div>
+
+<!-- Floral Side Decor -->
+<div class="floral-side left">
+  <div class="row big">🌿🌸🌿</div>
+  <div class="row">🌷🕊️🌷</div>
+  <div class="row big">🌺🌿🌺</div>
+  <div class="row">🌸🌷🌸</div>
+  <div class="row big">🌿🌹🌿</div>
+  <div class="row">🌷🌺🌷</div>
+  <div class="row big">🌸🌿🌸</div>
+  <div class="row">🌿🕊️🌿</div>
+</div>
+<div class="floral-side right">
+  <div class="row big">🌿🌷🌿</div>
+  <div class="row">🌺🌸🌺</div>
+  <div class="row big">🌹🌿🌹</div>
+  <div class="row">🌸🌷🌸</div>
+  <div class="row big">🌿🌺🌿</div>
+  <div class="row">🌷🌸🌷</div>
+  <div class="row big">🌹🌿🌹</div>
+  <div class="row">🌿🕊️🌿</div>
+</div>
+
+<header class="hero">
+  <div class="hero-content">
+    <div class="hero-badge">Save the Date</div>
+    <h1 class="hero-title">Janada <span class="amp">&amp;</span> Eyen</h1>
+    <div class="hero-divider"></div>
+    <p class="hero-date">Coming Soon • 2026</p>
+    <p class="hero-message">
+      Your presence is the greatest gift of all. But if you'd like to help us
+      begin our journey together, we've gathered a few things we'd treasure.
+    </p>
+  </div>
+</header>
+
+<main class="registry">
+  <div class="section-header">
+    <h2>Our Wedding Registry</h2>
+    <p>Every contribution brings us closer to our first home together</p>
+    <span class="ornament">✿ ❀ ✿</span>
+  </div>
+
+  <div class="items-grid">
+    <div class="item-card">
+      <div class="item-image"><span class="placeholder">🛋️</span></div>
+      <div class="item-body">
+        <div class="item-category">Furniture</div>
+        <div class="item-name">Furniture</div>
+        <div class="item-description">Quality furniture for your home</div>
+        <div class="item-price">₦3,000,000</div>
+        <div class="item-footer">
+          <span class="contrib-count"><span>0</span> contributions</span>
+          <button class="btn-contribute">Contribute</button>
+        </div>
+      </div>
+    </div>
+    <div class="item-card">
+      <div class="item-image"><span class="placeholder">📺</span></div>
+      <div class="item-body">
+        <div class="item-category">Electronics</div>
+        <div class="item-name">65" Smart TV</div>
+        <div class="item-description">Latest 65 inch smart television</div>
+        <div class="item-price">₦1,300,000</div>
+        <div class="item-footer">
+          <span class="contrib-count"><span>2</span> contributions</span>
+          <button class="btn-contribute">Contribute</button>
+        </div>
+      </div>
+    </div>
+    <div class="item-card">
+      <div class="item-image"><span class="placeholder">🏺</span></div>
+      <div class="item-body">
+        <div class="item-category">Home Decor</div>
+        <div class="item-name">Rug</div>
+        <div class="item-description">Beautiful area rug for your living space</div>
+        <div class="item-price">₦350,000</div>
+        <div class="item-footer">
+          <span class="contrib-count"><span>0</span> contributions</span>
+          <button class="btn-contribute">Contribute</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer class="footer">
+  <div class="flowers">✿ ❀ ✿ ❀ ✿</div>
+  <p>Made with love — Janada &amp; Eyen</p>
+</footer>
+
+</body>
+</html>

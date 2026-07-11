@@ -61,6 +61,20 @@ function formatCurrency(amount) {
 
 function getCategoryIcon(category) {
   const icons = {
+    'Furniture': '🛋️',
+    'Electronics': '📺',
+    'Home Decor': '🏺',
+    'Appliances': '🔌',
+    'Kitchen': '🍳',
+    'Laundry': '🧺',
+    'Cleaning': '🧹',
+    'Storage': '📦',
+  };
+  return icons[category] || '🎁';
+}
+
+function getCategoryIcon(category) {
+  const icons = {
     'Kitchen & Dining': '🍳',
     'Bed & Bath': '🛁',
     'Home & Decor': '🏠',
@@ -97,17 +111,19 @@ function createItemCard(item) {
 
   card.innerHTML = `
     <div class="item-image${hasImageClass}">${imageHtml}</div>
-    <div class="item-category">${escapeHtml(item.category)}</div>
-    <div class="item-name">${escapeHtml(item.name)}</div>
-    <div class="item-description">${escapeHtml(item.description)}</div>
-    <div class="item-price">${escapeHtml(item.price_range)}</div>
+    <div class="item-body">
+      <div class="item-category">${escapeHtml(item.category)}</div>
+      <div class="item-name">${escapeHtml(item.name)}</div>
+      <div class="item-description">${escapeHtml(item.description)}</div>
+      <div class="item-price">${escapeHtml(item.price_range)}</div>
 
-    <div class="funding-text">
-      <span>${contribText ? contribText + ' contributed' : ''}</span>
+      <div class="funding-text">
+        <span>${contribText ? contribText + ' contributed' : ''}</span>
+      </div>
+      ${contributorsHtml}
+
+      <button class="btn btn-primary contribute-btn" data-id="${item.id}">&#127873; Contribute</button>
     </div>
-    ${contributorsHtml}
-
-    <button class="btn btn-primary contribute-btn" data-id="${item.id}">🎁 Contribute</button>
   `;
 
   return card;

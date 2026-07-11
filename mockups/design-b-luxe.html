@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Design B: Modern Luxe — Janada & Eyen</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Inter:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #0D0D0D;
+      color: #E8E0D4;
+      line-height: 1.6;
+    }
+
+    /* ===== Floral Side Decor ===== */
+    .floral-side {
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      width: 80px;
+      pointer-events: none;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-around;
+      align-items: center;
+      padding: 2rem 0;
+      font-size: 1.4rem;
+      opacity: 0.15;
+    }
+    .floral-side.left { left: 0; }
+    .floral-side.right { right: 0; }
+    .floral-side .row { display: flex; gap: 4px; align-items: center; }
+    .floral-side .row.big { font-size: 1.8rem; }
+
+    /* ===== Hero ===== */
+    .hero {
+      position: relative;
+      background: radial-gradient(ellipse at 50% 0%, #1A1512 0%, #0D0D0D 100%);
+      text-align: center;
+      padding: 7rem 1.5rem 5rem;
+      border-bottom: 1px solid rgba(196,168,130,0.12);
+      overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(circle 60px at 5% 15%, rgba(196,168,130,0.04) 0%, transparent 70%),
+        radial-gradient(circle 50px at 95% 25%, rgba(196,168,130,0.03) 0%, transparent 70%),
+        radial-gradient(circle 80px at 8% 75%, rgba(196,168,130,0.04) 0%, transparent 70%),
+        radial-gradient(circle 60px at 92% 65%, rgba(196,168,130,0.03) 0%, transparent 70%);
+    }
+    .hero::after {
+      content: '✦ ✦ ✦';
+      position: absolute;
+      bottom: 1.5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 0.8rem;
+      letter-spacing: 1.5rem;
+      opacity: 0.08;
+    }
+    .hero-content { position: relative; z-index: 2; max-width: 700px; margin: 0 auto; }
+
+    .hero-gold-line {
+      width: 40px;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(196,168,130,0.4), transparent);
+      margin: 0 auto 1.5rem;
+    }
+
+    .hero-subtitle {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 6px;
+      color: #A0845C;
+      font-weight: 400;
+      margin-bottom: 1rem;
+    }
+
+    .hero-title {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 4.5rem;
+      font-weight: 700;
+      line-height: 1.05;
+      color: #E8E0D4;
+      margin-bottom: 0.5rem;
+    }
+    .hero-title .amp {
+      font-style: italic;
+      font-weight: 400;
+      color: #A0845C;
+    }
+
+    .hero-divider {
+      width: 100px;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(196,168,130,0.3), transparent);
+      margin: 1.5rem auto;
+    }
+
+    .hero-date {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.1rem;
+      color: #8B7B6A;
+      letter-spacing: 4px;
+      margin-bottom: 1.5rem;
+    }
+
+    .hero-message {
+      font-size: 0.9rem;
+      color: #7A6E60;
+      line-height: 1.9;
+      max-width: 500px;
+      margin: 0 auto;
+      font-weight: 300;
+    }
+
+    /* ===== Registry ===== */
+    .registry {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 4rem 1.5rem;
+      position: relative;
+      z-index: 2;
+    }
+
+    .section-header {
+      text-align: center;
+      margin-bottom: 3.5rem;
+    }
+    .section-header h2 {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 2.5rem;
+      font-weight: 600;
+      color: #C4A882;
+      margin-bottom: 0.5rem;
+    }
+    .section-header p {
+      color: #6A6055;
+      font-size: 0.85rem;
+      font-weight: 300;
+      letter-spacing: 0.5px;
+    }
+
+    .items-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .item-card {
+      background: #141210;
+      border: 1px solid rgba(196,168,130,0.1);
+      border-radius: 12px;
+      overflow: hidden;
+      transition: border-color 0.3s, transform 0.3s;
+      display: flex;
+      flex-direction: column;
+    }
+    .item-card:hover {
+      border-color: rgba(196,168,130,0.3);
+      transform: translateY(-2px);
+    }
+
+    .item-image {
+      width: 100%;
+      height: 170px;
+      background: #1C1916;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.5rem;
+      overflow: hidden;
+      opacity: 0.6;
+    }
+
+    .item-body {
+      padding: 1.25rem;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+    .item-category {
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      color: #7A6E60;
+      margin-bottom: 0.3rem;
+    }
+    .item-name {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 1.3rem;
+      font-weight: 600;
+      color: #E8E0D4;
+      margin-bottom: 0.25rem;
+    }
+    .item-description {
+      font-size: 0.8rem;
+      color: #6A6055;
+      line-height: 1.5;
+      margin-bottom: 0.75rem;
+      flex: 1;
+    }
+    .item-price {
+      font-size: 1rem;
+      font-weight: 500;
+      color: #C4A882;
+      margin-bottom: 0.75rem;
+      font-family: 'Cormorant Garamond', serif;
+    }
+    .item-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-top: 0.75rem;
+      border-top: 1px solid rgba(196,168,130,0.06);
+    }
+    .contrib-count { font-size: 0.75rem; color: #6A6055; }
+    .btn-contribute {
+      padding: 0.5rem 1.5rem;
+      background: transparent;
+      border: 1px solid rgba(196,168,130,0.3);
+      border-radius: 4px;
+      color: #C4A882;
+      font-size: 0.78rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      font-family: inherit;
+    }
+    .btn-contribute:hover {
+      background: #C4A882;
+      color: #0D0D0D;
+      border-color: #C4A882;
+    }
+
+    .footer {
+      position: relative;
+      z-index: 2;
+      text-align: center;
+      padding: 3rem 1.5rem;
+      border-top: 1px solid rgba(196,168,130,0.06);
+      color: #6A6055;
+      font-size: 0.8rem;
+    }
+
+    .mock-badge {
+      position: fixed;
+      top: 1rem;
+      right: 1rem;
+      background: #C4A882;
+      color: #0D0D0D;
+      padding: 0.4rem 1rem;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      z-index: 100;
+    }
+
+    @media (max-width: 768px) {
+      .floral-side, .vine { display: none; }
+    }
+    @media (max-width: 640px) {
+      .hero-title { font-size: 2.8rem; }
+      .hero { padding: 5rem 1.25rem 3.5rem; }
+      .items-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="mock-badge">Design B: Modern Luxe</div>
+
+<div class="floral-side left">
+  <div class="row big">🌿🌸🌿</div>
+  <div class="row">🌷✦🌷</div>
+  <div class="row big">🌺🌿🌺</div>
+  <div class="row">🌸🌷🌸</div>
+  <div class="row big">🌿🌹🌿</div>
+  <div class="row">🌷🌺🌷</div>
+  <div class="row big">🌸🌿🌸</div>
+  <div class="row">🌿✦🌿</div>
+</div>
+<div class="floral-side right">
+  <div class="row big">🌿🌷🌿</div>
+  <div class="row">🌺🌸🌺</div>
+  <div class="row big">🌹🌿🌹</div>
+  <div class="row">🌸🌷🌸</div>
+  <div class="row big">🌿🌺🌿</div>
+  <div class="row">🌷🌸🌷</div>
+  <div class="row big">🌹🌿🌹</div>
+  <div class="row">🌿✦🌿</div>
+</div>
+
+<header class="hero">
+  <div class="hero-content">
+    <div class="hero-gold-line"></div>
+    <p class="hero-subtitle">We're Getting Married</p>
+    <h1 class="hero-title">Janada <span class="amp">×</span> Eyen</h1>
+    <div class="hero-divider"></div>
+    <p class="hero-date">Coming Soon</p>
+    <p class="hero-message">
+      Every great love story begins with a shared dream. Help us
+      build the foundation of our first home together.
+    </p>
+  </div>
+</header>
+
+<main class="registry">
+  <div class="section-header">
+    <h2>Registry</h2>
+    <p>Thoughtfully chosen pieces for our new life</p>
+  </div>
+
+  <div class="items-grid">
+    <div class="item-card">
+      <div class="item-image">🛋️</div>
+      <div class="item-body">
+        <div class="item-category">Furniture</div>
+        <div class="item-name">Furniture</div>
+        <div class="item-description">Quality furniture for your home</div>
+        <div class="item-price">₦3,000,000</div>
+        <div class="item-footer">
+          <span class="contrib-count">0 contributions</span>
+          <button class="btn-contribute">Give</button>
+        </div>
+      </div>
+    </div>
+    <div class="item-card">
+      <div class="item-image">📺</div>
+      <div class="item-body">
+        <div class="item-category">Electronics</div>
+        <div class="item-name">65" Smart TV</div>
+        <div class="item-description">Latest 65 inch smart television</div>
+        <div class="item-price">₦1,300,000</div>
+        <div class="item-footer">
+          <span class="contrib-count">2 contributions</span>
+          <button class="btn-contribute">Give</button>
+        </div>
+      </div>
+    </div>
+    <div class="item-card">
+      <div class="item-image">🏺</div>
+      <div class="item-body">
+        <div class="item-category">Home Decor</div>
+        <div class="item-name">Rug</div>
+        <div class="item-description">Beautiful area rug for your living space</div>
+        <div class="item-price">₦350,000</div>
+        <div class="item-footer">
+          <span class="contrib-count">0 contributions</span>
+          <button class="btn-contribute">Give</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer class="footer">
+  <p>Janada &amp; Eyen</p>
+</footer>
+
+</body>
+</html>
