@@ -241,13 +241,6 @@ h1, h2, h3, h4 {
   font-style: italic;
 }
 
-/* ===== Input Hint ===== */
-.input-hint {
-  font-size: 0.78rem;
-  color: #999;
-  margin-top: -0.75rem;
-  margin-bottom: 1rem;
-}
 
 /* ===== Account Details ===== */
 .confirm-details {
