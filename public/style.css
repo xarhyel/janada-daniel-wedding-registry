@@ -161,18 +161,17 @@ h1, h2, h3, h4 { font-family: 'Playfair Display', Georgia, serif; font-weight: 4
 
 .item-image {
   width: 100%;
-  height: 210px;
+  height: 200px;
   background: linear-gradient(135deg, #F5EDE0, #EDE3D4);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 2.6rem;
   overflow: hidden;
-  position: relative;
 }
-.item-image.has-photo { background: #E0D4C3; padding: 0; }
+.item-image.has-photo { background: #E0D4C3; }
 .item-icon { display: inline; }
-.item-photo { width: 100%; height: 100%; object-fit: contain; display: block; }
+.item-photo { width: 100%; height: 100%; object-fit: cover; display: block; }
 
 .item-body {
   padding: 1rem 1.25rem 1.15rem;
