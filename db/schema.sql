@@ -18,6 +18,9 @@ ALTER TABLE items DROP COLUMN IF EXISTS claimed;
 ALTER TABLE items DROP COLUMN IF EXISTS claimed_by;
 ALTER TABLE items DROP COLUMN IF EXISTS claim_message;
 
+-- Drop old percentage column from contributions (migration to free-form amounts)
+ALTER TABLE contributions DROP COLUMN IF EXISTS percentage;
+
 CREATE TABLE IF NOT EXISTS contributions (
     id SERIAL PRIMARY KEY,
     item_id INTEGER NOT NULL REFERENCES items(id),
