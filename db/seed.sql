@@ -1,3 +1,8 @@
+-- Clear old items so seed always runs fresh
+DELETE FROM contributions;
+DELETE FROM items;
+SELECT setval('items_id_seq', 1, false);
+
 INSERT INTO items (name, description, category, price_range, price, image_url, sort_order)
 SELECT * FROM (VALUES
     ('Furniture', 'Quality furniture for your home', 'Furniture', '₦3,000,000', 3000000.00, 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=400&h=300&fit=crop', 1),
@@ -16,5 +21,4 @@ SELECT * FROM (VALUES
     ('Vacuum Cleaner', 'Powerful vacuum for cleaning floors', 'Cleaning', '₦250,000', 250000.00, 'https://images.unsplash.com/photo-1593642634367-d91a135587b5?w=400&h=300&fit=crop', 14),
     ('Glass Storage Bowls', 'Set of glass containers for storage', 'Kitchen', '₦150,000', 150000.00, 'https://images.unsplash.com/photo-1593642634367-d91a135587b5?w=400&h=300&fit=crop', 15),
     ('Shoe Rack', 'Organized shoe storage solution', 'Storage', '₦200,000', 200000.00, 'https://images.unsplash.com/photo-1593642634367-d91a135587b5?w=400&h=300&fit=crop', 16)
-) AS v(name, description, category, price_range, price, image_url, sort_order)
-WHERE NOT EXISTS (SELECT 1 FROM items LIMIT 1);
+) AS v(name, description, category, price_range, price, image_url, sort_order);
