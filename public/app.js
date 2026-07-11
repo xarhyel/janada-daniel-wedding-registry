@@ -19,7 +19,7 @@ const confirmForm = document.getElementById('confirm-form');
 const modalItemName = document.getElementById('contrib-item-name');
 const contribItemId = document.getElementById('contrib-item-id');
 const contribName = document.getElementById('contrib-name');
-const percentageOptions = document.querySelectorAll('.percentage-option');
+const contribAmount = document.getElementById('contrib-amount');
 
 const confirmItemName = document.getElementById('confirm-item-name');
 const confirmAmount = document.getElementById('confirm-amount');
@@ -56,7 +56,7 @@ function escapeHtml(str) {
 }
 
 function formatCurrency(amount) {
-  return '$' + parseFloat(amount).toFixed(2);
+  return '₦' + Number(amount).toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0});
 }
 
 function getCategoryIcon(category) {
@@ -84,10 +84,9 @@ function createItemCard(item) {
   const hasImageClass = item.image_url ? ' has-photo' : '';
 
   // Calculate progress info
-  const fundedPct = parseInt(item.funded_percentage) || 0;
   const fundedAmt = parseFloat(item.funded_amount) || 0;
   const price = parseFloat(item.price) || 0;
-  const fullyFunded = fundedPct >= 100;
+  const contribText = fundedAmt > 0 ? '₦' + Number(fundedAmt).toLocaleString('en-US', {minimumFractionDigits:0}) : '';
 
   // Build contributors detail
   let contributorsHtml = '';
@@ -103,19 +102,12 @@ function createItemCard(item) {
     <div class="item-description">${escapeHtml(item.description)}</div>
     <div class="item-price">${escapeHtml(item.price_range)}</div>
 
-    <div class="funding-bar">
-      <div class="funding-bar-fill" style="width: ${Math.min(fundedPct, 100)}%"></div>
-    </div>
     <div class="funding-text">
-      <span>${fullyFunded ? 'Fully funded! 🎉' : fundedPct + '% funded'}</span>
-      <span>${formatCurrency(fundedAmt)} / ${formatCurrency(price)}</span>
+      <span>${contribText ? contribText + ' contributed' : ''}</span>
     </div>
     ${contributorsHtml}
 
-    ${!fullyFunded
-      ? `<button class="btn btn-primary contribute-btn" data-id="${item.id}">🎁 Contribute</button>`
-      : `<button class="btn btn-primary" disabled>Fully Funded ✓</button>`
-    }
+    <button class="btn btn-primary contribute-btn" data-id="${item.id}">🎁 Contribute</button>
   `;
 
   return card;
@@ -160,9 +152,8 @@ async function fetchItems() {
 }
 
 // ==============================
-// Contribution Flow — Step 1: Select Percentage & Enter Name
+// Contribution Flow — Step 1: Enter Amount & Name
 // ==============================
-let selectedPercentage = 25;
 
 function openContribModal(itemId) {
   const item = items.find(i => i.id === itemId);
@@ -171,42 +162,22 @@ function openContribModal(itemId) {
   modalItemName.textContent = item.name;
   contribItemId.value = itemId;
   contribName.value = '';
-  selectedPercentage = 25;
-  updateCalculatedAmount(item);
-
-  // Highlight 25% by default
-  percentageOptions.forEach(opt => {
-    const pct = parseInt(opt.dataset.pct);
-    opt.classList.toggle('selected', pct === 25);
-  });
+  contribAmount.value = '';
 
   contribModal.classList.remove('hidden');
-  contribName.focus();
+  contribAmount.focus();
 }
-
-function updateCalculatedAmount(item) {
-  const amount = (parseFloat(item.price) * selectedPercentage) / 100;
-  document.getElementById('contrib-calc-amount').textContent = formatCurrency(amount);
-  document.getElementById('contrib-calc-pct').textContent = selectedPercentage + '%';
-}
-
-percentageOptions.forEach(opt => {
-  opt.addEventListener('click', () => {
-    percentageOptions.forEach(o => o.classList.remove('selected'));
-    opt.classList.add('selected');
-    selectedPercentage = parseInt(opt.dataset.pct);
-
-    const itemId = parseInt(contribItemId.value);
-    const item = items.find(i => i.id === itemId);
-    if (item) updateCalculatedAmount(item);
-  });
-});
 
 async function handleContribSubmit(e) {
   e.preventDefault();
   const id = contribItemId.value;
   const name = contribName.value.trim();
+  const amount = parseFloat(contribAmount.value);
   if (!name) return;
+  if (!amount || amount < 10000) {
+    showToast('Minimum contribution is ₦10,000');
+    return;
+  }
 
   const btn = contribForm.querySelector('button[type="submit"]');
   btn.disabled = true;
@@ -216,7 +187,7 @@ async function handleContribSubmit(e) {
     const res = await fetch(`${API_BASE}/${id}/contribute`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, percentage: selectedPercentage }),
+      body: JSON.stringify({ name, amount }),
     });
 
     const data = await res.json();
@@ -243,7 +214,7 @@ async function handleContribSubmit(e) {
 function showConfirmModal(contribution, name) {
   const item = items.find(i => i.id === contribution.item_id);
   confirmItemName.textContent = item ? item.name : 'Item';
-  confirmAmount.textContent = formatCurrency(contribution.amount) + ' (' + contribution.percentage + '%)';
+  confirmAmount.textContent = formatCurrency(contribution.amount);
   confirmAccountName.textContent = ACCOUNT.name;
   confirmAccountNumber.textContent = ACCOUNT.number;
   confirmBank.textContent = ACCOUNT.bank;
@@ -281,7 +252,6 @@ async function handleConfirmSubmit(e) {
     // Update local state
     const idx = items.findIndex(i => i.id === parseInt(id));
     if (idx !== -1) {
-      items[idx].funded_percentage = parseInt(data.item.funded_percentage);
       items[idx].funded_amount = parseFloat(data.item.funded_amount);
       items[idx].contributor_count = parseInt(data.item.contributor_count);
     }

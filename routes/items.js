@@ -9,14 +9,12 @@ module.exports = function (pool) {
         SELECT
           i.id, i.name, i.description, i.category, i.price_range, i.price,
           i.image_url, i.sort_order,
-          COALESCE(c.funded_percentage, 0) AS funded_percentage,
           COALESCE(c.funded_amount, 0) AS funded_amount,
           COALESCE(c.contributor_count, 0) AS contributor_count
         FROM items i
         LEFT JOIN (
           SELECT
             item_id,
-            SUM(percentage) AS funded_percentage,
             SUM(amount) AS funded_amount,
             COUNT(*) AS contributor_count
           FROM contributions
@@ -49,13 +47,12 @@ module.exports = function (pool) {
       const item = itemResult.rows[0];
 
       const contribResult = await pool.query(
-        'SELECT id, contributor_name, percentage, amount, paid, created_at FROM contributions WHERE item_id = $1 ORDER BY created_at DESC',
+        'SELECT id, contributor_name, amount, paid, created_at FROM contributions WHERE item_id = $1 ORDER BY created_at DESC',
         [id]
       );
       item.contributions = contribResult.rows;
 
       const paid = contribResult.rows.filter(c => c.paid);
-      item.funded_percentage = paid.reduce((s, c) => s + c.percentage, 0);
       item.funded_amount = parseFloat(paid.reduce((s, c) => s + parseFloat(c.amount), 0));
 
       res.json(item);
@@ -86,7 +83,7 @@ module.exports = function (pool) {
   // POST /api/items/:id/contribute — create a contribution (paid=false)
   router.post('/:id/contribute', async (req, res) => {
     const { id } = req.params;
-    const { name, percentage } = req.body;
+    const { name, amount } = req.body;
 
     if (!/^\d+$/.test(id)) {
       return res.status(400).json({ error: 'Invalid item ID' });
@@ -94,42 +91,18 @@ module.exports = function (pool) {
     if (!name || !name.trim()) {
       return res.status(400).json({ error: 'Name is required' });
     }
-    if (![25, 50, 75, 100].includes(percentage)) {
-      return res.status(400).json({ error: 'Percentage must be 25, 50, 75, or 100' });
+
+    const contribAmount = parseFloat(amount);
+    if (!contribAmount || contribAmount < 10000) {
+      return res.status(400).json({ error: 'Minimum contribution is ₦10,000' });
     }
 
     try {
-      // Get item price
-      const itemResult = await pool.query(
-        'SELECT id, name, price FROM items WHERE id = $1',
-        [id]
-      );
-      if (itemResult.rows.length === 0) {
-        return res.status(404).json({ error: 'Item not found' });
-      }
-      const item = itemResult.rows[0];
-
-      // Check if item is already fully funded
-      const fundedResult = await pool.query(
-        'SELECT COALESCE(SUM(percentage), 0) AS total FROM contributions WHERE item_id = $1 AND paid = TRUE',
-        [id]
-      );
-      const currentTotal = parseInt(fundedResult.rows[0].total);
-      if (currentTotal + percentage > 100) {
-        return res.status(409).json({
-          error: `Only ${100 - currentTotal}% remaining for this item. Please choose a lower percentage.`,
-          remaining: 100 - currentTotal
-        });
-      }
-
-      // Calculate amount
-      const amount = (parseFloat(item.price) * percentage) / 100;
-
       const result = await pool.query(
-        `INSERT INTO contributions (item_id, contributor_name, percentage, amount, paid)
-         VALUES ($1, $2, $3, $4, FALSE)
-         RETURNING id, contributor_name, percentage, amount, paid, created_at`,
-        [id, name.trim(), percentage, amount]
+        `INSERT INTO contributions (item_id, contributor_name, amount, paid)
+         VALUES ($1, $2, $3, FALSE)
+         RETURNING id, contributor_name, amount, paid, created_at`,
+        [id, name.trim(), contribAmount]
       );
 
       res.json({
@@ -164,7 +137,7 @@ module.exports = function (pool) {
         `UPDATE contributions
          SET paid = TRUE
          WHERE id = $1 AND item_id = $2 AND contributor_name = $3 AND paid = FALSE
-         RETURNING id, contributor_name, percentage, amount, paid, created_at`,
+         RETURNING id, contributor_name, amount, paid, created_at`,
         [contributionId, id, name.trim()]
       );
 
@@ -177,7 +150,6 @@ module.exports = function (pool) {
       // Fetch updated item summary
       const itemResult = await pool.query(`
         SELECT i.id, i.name, i.price,
-          COALESCE(SUM(c.percentage), 0) AS funded_percentage,
           COALESCE(SUM(c.amount), 0) AS funded_amount,
           COUNT(c.id) AS contributor_count
         FROM items i

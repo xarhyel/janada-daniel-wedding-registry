@@ -22,8 +22,7 @@ CREATE TABLE IF NOT EXISTS contributions (
     id SERIAL PRIMARY KEY,
     item_id INTEGER NOT NULL REFERENCES items(id),
     contributor_name VARCHAR(100) NOT NULL,
-    percentage INTEGER NOT NULL CHECK (percentage IN (25, 50, 75, 100)),
-    amount NUMERIC(10,2) NOT NULL,
+    amount NUMERIC(10,2) NOT NULL CHECK (amount >= 10000),
     paid BOOLEAN NOT NULL DEFAULT FALSE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
