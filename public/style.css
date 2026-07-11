@@ -14,29 +14,21 @@ h1, h2, h3, h4 { font-family: 'Playfair Display', Georgia, serif; font-weight: 4
 .floral-side {
   position: fixed;
   top: 0; bottom: 0;
-  width: 70px;
+  width: 60px;
   pointer-events: none;
   z-index: 1;
   display: flex;
   flex-direction: column;
-  justify-content: space-around;
   align-items: center;
-  padding: 1.5rem 0;
-  font-size: 1.5rem;
-  opacity: 0.18;
+  padding: 1rem 0;
+  opacity: 0.2;
 }
-.floral-side.left { left: 0; }
-.floral-side.right { right: 0; }
-.floral-side::before {
-  content: '🌿🌸🌿\A🌷🕊️🌷\A🌺🌿🌺\A🌸🌷🌸\A🌿🌹🌿\A🌷🌺🌷\A🌸🌿🌸\A🌿🕊️🌿';
-  white-space: pre;
-  line-height: 2.8rem;
-  text-align: center;
-}
-.floral-side.right::before {
-  content: '🌿🌷🌿\A🌺🌸🌺\A🌹🌿🌹\A🌸🌷🌸\A🌿🌺🌿\A🌷🌸🌷\A🌹🌿🌹\A🌿🕊️🌿';
-  white-space: pre;
-  line-height: 2.8rem;
+.floral-side.left { left: 5px; }
+.floral-side.right { right: 5px; }
+.floral-side span {
+  display: block;
+  font-size: 1.3rem;
+  line-height: 2.4rem;
   text-align: center;
 }
 
@@ -46,7 +38,7 @@ h1, h2, h3, h4 { font-family: 'Playfair Display', Georgia, serif; font-weight: 4
   background: linear-gradient(165deg, #6B4F3A 0%, #8B6F47 40%, #A0845C 100%);
   color: #fff;
   text-align: center;
-  padding: 4.5rem 1.5rem 4rem;
+  padding: 5rem 1.5rem 4.5rem;
   overflow: hidden;
 }
 .hero::before {
