@@ -8,7 +8,7 @@ SELECT * FROM (VALUES
     -- Furniture
     ('Furniture', 'Quality furniture for your home', 'Furniture', '₦3,000,000', 3000000.00, '/img/Furniture.png', 1),
     -- Electronics
-    ('65" Smart TV', 'Latest 65 inch smart television', 'Electronics', '₦1,300,000', 1300000.00, '/img/65 Inch TV.jpg', 2),
+    ('Smart TV', 'Latest 65 inch smart television', 'Electronics', '₦1,300,000', 1300000.00, '/img/65 Inch TV.jpg', 2),
     -- Home Decor
     ('Rug', 'Beautiful area rug for your living space', 'Home Decor', '₦350,000', 350000.00, '/img/Rug.jpg', 3),
     -- Appliances
