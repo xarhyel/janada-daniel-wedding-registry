@@ -38,5 +38,3 @@ initDb()
     console.error('Failed to initialize database:', err);
     process.exit(1);
   });
-
-module.exports = { pool };

@@ -10,22 +10,24 @@ CREATE TABLE IF NOT EXISTS items (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Add price column if upgrading from old schema
 ALTER TABLE items ADD COLUMN IF NOT EXISTS price NUMERIC(10,2) NOT NULL DEFAULT 0;
 
--- Drop old claim-system columns (replaced by contributions table)
 ALTER TABLE items DROP COLUMN IF EXISTS claimed;
 ALTER TABLE items DROP COLUMN IF EXISTS claimed_by;
 ALTER TABLE items DROP COLUMN IF EXISTS claim_message;
 
--- Drop old percentage column from contributions (migration to free-form amounts)
-ALTER TABLE contributions DROP COLUMN IF EXISTS percentage;
+-- Contributions: free-form amount (no percentages).
+-- DROP and recreate so legacy percentage columns/constraints on existing DBs are removed.
+DROP TABLE IF EXISTS contributions;
 
-CREATE TABLE IF NOT EXISTS contributions (
+CREATE TABLE contributions (
     id SERIAL PRIMARY KEY,
     item_id INTEGER NOT NULL REFERENCES items(id),
     contributor_name VARCHAR(100) NOT NULL,
-    amount NUMERIC(10,2) NOT NULL CHECK (amount >= 10000),
+    amount NUMERIC(10,2) NOT NULL CHECK (amount >= 0),
     paid BOOLEAN NOT NULL DEFAULT FALSE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE INDEX IF NOT EXISTS idx_contributions_item ON contributions(item_id);
+CREATE INDEX IF NOT EXISTS idx_contributions_paid ON contributions(paid);

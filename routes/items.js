@@ -54,6 +54,7 @@ module.exports = function (pool) {
 
       const paid = contribResult.rows.filter(c => c.paid);
       item.funded_amount = parseFloat(paid.reduce((s, c) => s + parseFloat(c.amount), 0));
+      item.contributor_count = paid.length;
 
       res.json(item);
     } catch (err) {
@@ -70,7 +71,7 @@ module.exports = function (pool) {
     }
     try {
       const result = await pool.query(
-        'SELECT id, contributor_name, percentage, amount, paid, created_at FROM contributions WHERE item_id = $1 ORDER BY created_at DESC',
+        'SELECT id, contributor_name, amount, paid, created_at FROM contributions WHERE item_id = $1 ORDER BY created_at DESC',
         [id]
       );
       res.json(result.rows);
