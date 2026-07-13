@@ -164,6 +164,14 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;opac
   .item-cta{flex-direction:column;align-items:flex-start;gap:.7rem}
   .sheet{padding:1.6rem}
 }
+/* Closed / fully gifted state */
+.item.is-closed .item-img{filter:grayscale(.55) brightness(.94)}
+.item.is-closed .item-name{color:var(--ink-faint);font-style:italic}
+.item.is-closed .item-name::after{content:' · gifted';font-style:italic;color:var(--gold);font-size:.85em;margin-left:.3em}
+.item-badge{position:absolute;top:.9rem;left:.9rem;background:var(--espresso);color:var(--paper);font-family:var(--sans);font-size:.58rem;letter-spacing:.28em;text-transform:uppercase;padding:.35rem .75rem;border-radius:40px;z-index:2;box-shadow:0 4px 14px rgba(42,35,32,.2)}
+.btn.is-closed, .btn[disabled]{border-color:var(--line);color:var(--ink-faint);cursor:not-allowed;background:transparent}
+.btn.is-closed:hover, .btn[disabled]:hover{background:transparent;color:var(--ink-faint);border-color:var(--line);transform:none;box-shadow:none}
+
 ::-webkit-scrollbar{width:8px}
 ::-webkit-scrollbar-track{background:var(--paper-warm)}
 ::-webkit-scrollbar-thumb{background:var(--gold-soft);border-radius:4px}
@@ -303,12 +311,25 @@ function fmt(n){return '₦'+Number(n).toLocaleString('en-US',{maximumFractionDi
 function getSorted(){const a=[...items];if(sortMode==='price-asc')a.sort((x,y)=>parseFloat(x.price)-parseFloat(y.price));else if(sortMode==='price-desc')a.sort((x,y)=>parseFloat(y.price)-parseFloat(x.price));return a;}
 
 function renderItem(item,idx){
-  const el=document.createElement('article');el.className='item';el.style.animationDelay=(idx*0.06)+'s';
+  const el=document.createElement('article');
+  const closed=!!item.funded;
+  el.className='item'+(closed?' is-closed':'');el.style.animationDelay=(idx*0.06)+'s';
   const num=String(idx+1).padStart(2,'0');
   const img=item.image_url?`<img src="${item.image_url}" alt="${escapeHtml(item.name)}" loading="lazy" onerror="this.style.display='none'">`:'';
-  const funded=parseFloat(item.funded_amount)||0, cc=parseInt(item.contributor_count)||0;
-  const contrib=funded>0?`<span class="contrib">${cc} ${cc===1?'loved one':'loved ones'} &middot; ${fmt(funded)} raised</span>`:'Awaiting its first gift';
-  el.innerHTML=`<div class="item-num">${num}</div><div class="item-img">${img}</div><div class="item-body"><div class="item-cat">${escapeHtml(item.category)}</div><div class="item-name">${escapeHtml(item.name)}</div><div class="item-desc">${escapeHtml(item.description)}</div><div class="item-meta">${contrib}</div></div><div class="item-cta"><div class="item-price"><span class="n">From</span>${fmt(item.price)}</div><button class="btn contribute-btn" data-id="${item.id}">Contribute</button></div>`;
+  const badge=closed?`<div class="item-badge">Fully Gifted</div>`:'';
+  const cta=closed
+    ?`<div class="item-cta"><div class="item-price"><span class="n">Gift Value</span>${fmt(item.price)}</div><button class="btn is-closed" disabled aria-disabled="true">Closed</button></div>`
+    :`<div class="item-cta"><div class="item-price"><span class="n">From</span>${fmt(item.price)}</div><button class="btn contribute-btn" data-id="${item.id}">Contribute</button></div>`;
+  el.innerHTML=`
+    <div class="item-num">${num}</div>
+    <div class="item-img">${img}${badge}</div>
+    <div class="item-body">
+      <div class="item-cat">${escapeHtml(item.category)}</div>
+      <div class="item-name">${escapeHtml(item.name)}</div>
+      <div class="item-desc">${escapeHtml(item.description)}</div>
+    </div>
+    ${cta}
+  `;
   return el;
 }
 
@@ -335,6 +356,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModals();});
 
 function openContrib(id){
   const item=items.find(i=>i.id===id);if(!item)return;
+  if(item.funded){showToast('This gift has already been fully contributed to.');return;}
   $('contrib-item-name').textContent=item.name;$('contrib-item-id').value=id;
   $('contrib-amount').value='';$('contrib-name').value='';
   openModal(contribModal);setTimeout(()=>$('contrib-amount').focus(),60);
@@ -374,8 +396,8 @@ confirmForm.addEventListener('submit',async e=>{
   try{const r=await fetch(`${API_BASE}/${id}/confirm/${contribId}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name})});
   const data=await r.json();if(!r.ok){showToast(data.error||'Could not confirm payment');return;}
   const idx=items.findIndex(i=>i.id===parseInt(id));
-  if(idx!==-1&&data.item){items[idx].funded_amount=parseFloat(data.item.funded_amount);items[idx].contributor_count=parseInt(data.item.contributor_count);}
-  render();closeModals();showToast('Thank you — your gift has been recorded.');}
+  if(idx!==-1&&data.item){items[idx].funded_amount=parseFloat(data.item.funded_amount);items[idx].funded=!!data.item.funded;}
+  render();closeModals();showToast(data.item&&data.item.funded?'Your gift completed this one. Thank you.':'Thank you — your gift has been recorded.');}
   catch(err){showToast('Something went wrong. Please try again.');}
   finally{btn.disabled=false;btn.textContent='✓ Yes, I Have Paid';}
 });

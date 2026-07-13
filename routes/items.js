@@ -1,44 +1,57 @@
 const express = require('express');
 const router = express.Router();
 
+function isFunded(price, fundedAmount) {
+  return parseFloat(price) > 0 && parseFloat(fundedAmount) >= parseFloat(price);
+}
+
 module.exports = function (pool) {
-  // GET /api/items — list all items with contribution summary
+  // GET /api/items — list all items with contribution summary + funded flag
   router.get('/', async (req, res) => {
     try {
       const result = await pool.query(`
         SELECT
           i.id, i.name, i.description, i.category, i.price_range, i.price,
           i.image_url, i.sort_order,
-          COALESCE(c.funded_amount, 0) AS funded_amount,
-          COALESCE(c.contributor_count, 0) AS contributor_count
+          COALESCE(c.funded_amount, 0) AS funded_amount
         FROM items i
         LEFT JOIN (
           SELECT
             item_id,
-            SUM(amount) AS funded_amount,
-            COUNT(*) AS contributor_count
+            SUM(amount) AS funded_amount
           FROM contributions
           WHERE paid = TRUE
           GROUP BY item_id
         ) c ON c.item_id = i.id
         ORDER BY i.sort_order ASC
       `);
-      res.json(result.rows);
+      // Parse numeric columns once + derive funded flag
+      const items = result.rows.map(r => {
+        const price = parseFloat(r.price) || 0;
+        const funded_amount = parseFloat(r.funded_amount) || 0;
+        return {
+          ...r,
+          price,
+          funded_amount,
+          funded: isFunded(price, funded_amount),
+        };
+      });
+      res.json(items);
     } catch (err) {
       console.error('Error fetching items:', err);
       res.status(500).json({ error: 'Failed to fetch items' });
     }
   });
 
-  // GET /api/items/:id — single item with contributions
+  // GET /api/items/:id — single item with contributions + funded flag
   router.get('/:id', async (req, res) => {
     const { id } = req.params;
     if (!/^\d+$/.test(id)) {
-      return res.status(400).json({ error: 'Invalid item ID' });
+      return returnInvalidId(res);
     }
     try {
       const itemResult = await pool.query(
-        'SELECT id, name, description, category, price_range, price, image_url, sort_order FROM items WHERE id = $1',
+        'SELECT id, name, description, category, price_range, price::numeric AS price, image_url, sort_order FROM items WHERE id = $1',
         [id]
       );
       if (itemResult.rows.length === 0) {
@@ -54,7 +67,8 @@ module.exports = function (pool) {
 
       const paid = contribResult.rows.filter(c => c.paid);
       item.funded_amount = parseFloat(paid.reduce((s, c) => s + parseFloat(c.amount), 0));
-      item.contributor_count = paid.length;
+      item.price = parseFloat(item.price) || 0;
+      item.funded = isFunded(item.price, item.funded_amount);
 
       res.json(item);
     } catch (err) {
@@ -63,11 +77,11 @@ module.exports = function (pool) {
     }
   });
 
-  // GET /api/items/:id/contributions — list unpaid contributions for an item
+  // GET /api/items/:id/contributions — list contributions for an item
   router.get('/:id/contributions', async (req, res) => {
     const { id } = req.params;
     if (!/^\d+$/.test(id)) {
-      return res.status(400).json({ error: 'Invalid item ID' });
+      return returnInvalidId(res);
     }
     try {
       const result = await pool.query(
@@ -87,7 +101,7 @@ module.exports = function (pool) {
     const { name, amount } = req.body;
 
     if (!/^\d+$/.test(id)) {
-      return res.status(400).json({ error: 'Invalid item ID' });
+      return returnInvalidId(res);
     }
     if (!name || !name.trim()) {
       return res.status(400).json({ error: 'Name is required' });
@@ -97,8 +111,32 @@ module.exports = function (pool) {
     if (!contribAmount || contribAmount < 10000) {
       return res.status(400).json({ error: 'Minimum contribution is ₦10,000' });
     }
+    if (contribAmount > 10000000) {
+      return res.status(400).json({ error: 'Contribution exceeds the item total — please choose a smaller amount.' });
+    }
 
     try {
+      // Look up item + funded state before recording the pledge
+      const itemRow = await pool.query(
+        'SELECT i.price::numeric AS price, COALESCE(SUM(c.amount), 0) AS funded_amount FROM items i LEFT JOIN contributions c ON c.item_id = i.id AND c.paid = TRUE WHERE i.id = $1 GROUP BY i.id, i.price',
+        [id]
+      );
+      if (itemRow.rows.length === 0) {
+        return res.status(404).json({ error: 'Item not found' });
+      }
+      const price = parseFloat(itemRow.rows[0].price) || 0;
+      const funded = parseFloat(itemRow.rows[0].funded_amount) || 0;
+      if (isFunded(price, funded)) {
+        return res.status(409).json({ error: 'This gift has already been fully contributed to.' });
+      }
+      // Cap pledge so we never overshoot the book price
+      const remaining = price - funded;
+      if (contribAmount > remaining) {
+        return res.status(400).json({
+          error: `Only ₦${remaining.toLocaleString('en-US', { maximumFractionDigits: 0 })} still needed. Please choose a smaller amount.`,
+        });
+      }
+
       const result = await pool.query(
         `INSERT INTO contributions (item_id, contributor_name, amount, paid)
          VALUES ($1, $2, $3, FALSE)
@@ -127,7 +165,7 @@ module.exports = function (pool) {
     const { name } = req.body;
 
     if (!/^\d+$/.test(id) || !/^\d+$/.test(contributionId)) {
-      return res.status(400).json({ error: 'Invalid ID' });
+      return returnInvalidId(res);
     }
     if (!name || !name.trim()) {
       return res.status(400).json({ error: 'Name is required' });
@@ -148,21 +186,25 @@ module.exports = function (pool) {
         });
       }
 
-      // Fetch updated item summary
+      // Fetch updated item summary + funded flag
       const itemResult = await pool.query(`
-        SELECT i.id, i.name, i.price,
-          COALESCE(SUM(c.amount), 0) AS funded_amount,
-          COUNT(c.id) AS contributor_count
+        SELECT i.id, i.name, i.price::numeric AS price,
+          COALESCE(SUM(c.amount), 0) AS funded_amount
         FROM items i
         LEFT JOIN contributions c ON c.item_id = i.id AND c.paid = TRUE
         WHERE i.id = $1
         GROUP BY i.id, i.name, i.price
       `, [id]);
 
+      const item = itemResult.rows[0] || {};
+      item.price = parseFloat(item.price) || 0;
+      item.funded_amount = parseFloat(item.funded_amount) || 0;
+      item.funded = isFunded(item.price, item.funded_amount);
+
       res.json({
         success: true,
         contribution: result.rows[0],
-        item: itemResult.rows[0]
+        item,
       });
     } catch (err) {
       console.error('Error confirming payment:', err);
@@ -171,4 +213,8 @@ module.exports = function (pool) {
   });
 
   return router;
+
+  function returnInvalidId(res) {
+    return res.status(400).json({ error: 'Invalid ID' });
+  }
 };
